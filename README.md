@@ -80,8 +80,20 @@ npm start
 
 ## 🏗️ Architecture
 
+### Backend Structure
+- **API Routes**:
+  - `api/hangout/` - Conversation management
+    - `conversation/` - AI chat responses (GPT-4o-mini)
+    - `voice/` - ElevenLabs STT token generation
+    - `speech/` - Text-to-speech synthesis
+  - `api/evaluation/` - Session analysis
+    - `session/` - Post-hangout comprehensive evaluation
+    - `transcript/` - (Future) Detailed transcript review with corrections
+- **Core Logic**:
+  - `lib/features/evaluation/evaluator.ts` - TypeScript evaluation engine with full type safety
+
 ### Evaluation System
-- **Location**: `speakmate-ai/evaluator.js` (isolated module for continuous enhancement)
+- **Location**: `src/lib/features/evaluation/evaluator.ts` (TypeScript with comprehensive types)
 - **Approach**: Hybrid AI + quantitative metrics
 - **AI Model**: OpenAI GPT-4o-mini (temperature: 0.3, max_tokens: 800)
 - **Metrics Analyzed**: 
@@ -116,10 +128,13 @@ speakmate/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── chat/                    # AI conversation endpoint
-│   │   │   ├── evaluate-session/        # Evaluation API (imports evaluator.js)
-│   │   │   ├── scribe-token/            # ElevenLabs token generation
-│   │   │   └── elevenlabs-tts/          # Text-to-speech endpoint
+│   │   │   ├── hangout/
+│   │   │   │   ├── conversation/        # AI conversation endpoint (GPT-4o-mini)
+│   │   │   │   ├── voice/               # ElevenLabs STT token generation
+│   │   │   │   └── speech/              # Text-to-speech endpoint
+│   │   │   └── evaluation/
+│   │   │       ├── session/             # Post-session evaluation API
+│   │   │       └── transcript/          # (Future) Transcript review with corrections
 │   │   ├── hangout/
 │   │   │   ├── page.tsx                 # Main conversation interface
 │   │   │   ├── summary/page.tsx         # Session evaluation summary
@@ -128,13 +143,18 @@ speakmate/
 │   │   ├── layout.tsx                   # Root layout
 │   │   ├── page.tsx                     # Home page
 │   │   └── globals.css                  # Global styles
+│   ├── lib/
+│   │   ├── features/
+│   │   │   └── evaluation/
+│   │   │       └── evaluator.ts         # TypeScript evaluation engine (450+ lines)
+│   │   └── services/                    # (Future) External service integrations
 │   ├── hooks/
 │   │   ├── useSpeechRecognition.ts      # ElevenLabs WebSocket STT hook
 │   │   └── useTextToSpeech.ts           # TTS hook
 │   └── components/
 │       └── Logo.tsx                     # SpeakMate logo component
-├── speakmate-ai/
-│   └── evaluator.js                     # Isolated evaluation engine (450+ lines)
+├── speakmate-ai/                        # Legacy (deprecated - migrated to src/lib/)
+│   └── evaluator.js                     # Old JS evaluator (use TypeScript version)
 ├── public/                              # Static assets
 ├── .github/
 │   └── copilot-instructions.md          # Project context for GitHub Copilot
@@ -157,9 +177,15 @@ speakmate/
 
 ## 🔒 Git Repository
 
-This project uses git for version control. Current milestone:
+This project uses git for version control. Current milestones:
 
-**MILESTONE: Hybrid AI Evaluator with Quantitative Metrics** (commit: `aa6dc41`)
+**Latest: Backend Reorganization Complete** (commit: `e6c0d0d`)
+- Organized API structure (hangout/, evaluation/)
+- TypeScript evaluation engine with full type safety
+- Migrated all routes, updated frontend
+- All features tested and working
+
+**Previous: Hybrid AI Evaluator with Quantitative Metrics** (commit: `aa6dc41`)
 - Isolated evaluation engine
 - AI + metrics approach
 - All features functional and tested
