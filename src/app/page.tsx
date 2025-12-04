@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Logo } from "@/components/Logo";
 
@@ -22,7 +22,7 @@ type EvaluationResult = {
   note: string;
 };
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const [screen, setScreen] = useState<Screen>("welcome");
   const [authMode, setAuthMode] = useState<AuthMode>(null);
@@ -2584,5 +2584,15 @@ function NavButton({ icon, label, active = false, onClick }: { icon: string; lab
       <span className="text-2xl mb-1">{icon}</span>
       <span className="text-[11px] font-medium">{label}</span>
     </button>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="text-gray-600 dark:text-gray-300">Loading...</div>
+    </div>}>
+      <HomeContent />
+    </Suspense>
   );
 }

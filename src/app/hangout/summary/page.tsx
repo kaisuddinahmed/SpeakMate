@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
-export default function SessionSummaryPage() {
+function SummaryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [summary, setSummary] = useState({
@@ -70,7 +70,7 @@ export default function SessionSummaryPage() {
         const conversationHistory = JSON.parse(conversationHistoryStr || '[]');
 
         // Call OpenAI evaluation API
-        const response = await fetch('/api/evaluate-session', {
+        const response = await fetch('/api/evaluation/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ transcript, conversationHistory })
@@ -198,7 +198,7 @@ export default function SessionSummaryPage() {
                     </svg>
                   </div>
                   <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Great Job!</h2>
-                  <p className="text-gray-600 dark:text-gray-300">You've completed another conversation session</p>
+                  <p className="text-gray-600 dark:text-gray-300">You&apos;ve completed another conversation session</p>
                 </div>
               ) : (
                 <div className="text-center py-6">
@@ -334,7 +334,7 @@ export default function SessionSummaryPage() {
                   Ready to talk again?
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
-                  Start a conversation with SpeakMate to build a habit of speaking. You'll get personalized feedback after each session!
+                  Start a conversation with SpeakMate to build a habit of speaking. You&apos;ll get personalized feedback after each session!
                 </p>
                 <button
                   onClick={() => router.push('/hangout' + (currentGoal ? `?goal=${currentGoal}` : ''))}
@@ -368,5 +368,15 @@ export default function SessionSummaryPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SessionSummaryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="text-gray-600 dark:text-gray-300">Loading...</div>
+    </div>}>
+      <SummaryContent />
+    </Suspense>
   );
 }

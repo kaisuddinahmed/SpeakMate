@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 
-export default function HangoutPage() {
+function HangoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -108,7 +108,7 @@ export default function HangoutPage() {
       
       // Call OpenAI API
       try {
-        const res = await fetch("/api/chat", {
+        const res = await fetch("/api/hangout/conversation", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -414,5 +414,15 @@ export default function HangoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HangoutPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="text-gray-600 dark:text-gray-300">Loading...</div>
+    </div>}>
+      <HangoutContent />
+    </Suspense>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
 interface DetailedFeedback {
   whatYouDidWell: string[];
@@ -9,7 +9,7 @@ interface DetailedFeedback {
   recommendedPractice: string;
 }
 
-export default function DetailedFeedbackPage() {
+function DetailedFeedbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [feedback, setFeedback] = useState<DetailedFeedback | null>(null);
@@ -155,5 +155,15 @@ export default function DetailedFeedbackPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DetailedFeedbackPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="text-gray-600 dark:text-gray-300">Loading...</div>
+    </div>}>
+      <DetailedFeedbackContent />
+    </Suspense>
   );
 }

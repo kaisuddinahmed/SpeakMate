@@ -116,7 +116,7 @@ export function useSpeechRecognition(
     try {
       // Get single-use token from backend
       console.log("[STT] Requesting token...");
-      const tokenRes = await fetch("/api/scribe-token");
+      const tokenRes = await fetch("/api/hangout/voice");
       if (!tokenRes.ok) {
         const errorData = await tokenRes.json();
         console.error("[STT] Token error:", errorData);

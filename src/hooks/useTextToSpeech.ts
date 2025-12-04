@@ -9,7 +9,7 @@ export function useTextToSpeech() {
 
     try {
       // Call ElevenLabs TTS API
-      const res = await fetch("/api/tts", {
+      const res = await fetch("/api/hangout/speech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: trimmed }),

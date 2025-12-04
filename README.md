@@ -4,29 +4,34 @@ Your friendly AI companion to improve English fluency through natural conversati
 
 ## ✨ Features
 
-- 🎤 **Real-time Voice Conversation** - Speak with AI and get instant responses
-- 💬 **Interactive Chat Interface** - See transcripts and feedback in real-time
-- 🎯 **Live Feedback** - Grammar, vocabulary, and pronunciation tips as you speak
-- 📊 **Progress Tracking** - IELTS band scoring system for all skills
+- 🎤 **Real-time Voice Conversation** - ElevenLabs WebSocket STT with low-latency transcription
+- 💬 **Interactive Chat Interface** - Auto-scrolling chat with conversation history
+- 📞 **Phone Call Mode** - Natural conversation flow with mic button toggle
+- 🎯 **AI-Powered Evaluation** - Hybrid approach combining GPT-4o-mini with quantitative metrics
+- 📊 **Detailed Feedback** - Session scores with structured recommendations
 - 🎯 **Goal-based Learning** - Choose between IELTS Prep, Professional English, or General Fluency
 - 🎨 **Modern UI** - Beautiful, responsive design with dark mode support
-- 🔊 **Speech Recognition** - Automatically converts your speech to text
-- 🗣️ **Text-to-Speech** - AI responds with natural voice
+- 🔊 **Speech Recognition** - ElevenLabs Scribe v2 Realtime (English-locked)
+- 🗣️ **Text-to-Speech** - Natural AI voice responses
 - 🚀 **Fast & Lightweight** - Built with Next.js 15 and React 19
+- 📈 **Quantitative Metrics** - Vocabulary diversity, hesitation rate, discourse markers, sentence complexity
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15 (App Router), React 19, TypeScript
 - **Styling**: Tailwind CSS
-- **AI**: OpenAI GPT-4o-mini for conversations
-- **Speech**: Browser Web Speech API (Speech Recognition & Synthesis)
+- **AI Conversation**: OpenAI GPT-4o-mini
+- **AI Evaluation**: OpenAI GPT-4o-mini with quantitative metrics layer
+- **Speech-to-Text**: ElevenLabs Scribe v2 Realtime (WebSocket)
+- **Text-to-Speech**: ElevenLabs TTS
+- **Audio Processing**: Web Audio API (ScriptProcessorNode, gain nodes)
 
 ## 📋 Prerequisites
 
-- Node.js 24+ (installed via NVM)
+- Node.js 24.11.1 (installed via NVM)
 - npm package manager
 - OpenAI API key
-- Modern browser with Web Speech API support (Chrome, Edge recommended)
+- ElevenLabs API key
 
 ## 🚀 Getting Started
 
@@ -36,11 +41,12 @@ Your friendly AI companion to improve English fluency through natural conversati
 npm install
 ```
 
-### 2. Configure OpenAI API Key
+### 2. Configure Environment Variables
 
-The API key is already configured in `.env.local`. To update it:
+Create `.env.local` with:
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
+ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
 ```
 
 ⚠️ **Never commit `.env.local` to git** - it's already in `.gitignore`
@@ -48,19 +54,22 @@ OPENAI_API_KEY=your_openai_api_key_here
 ### 3. Run Development Server
 
 ```bash
-npm run dev
+# Make sure you're using the correct Node version
+export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Or use the VS Code task: **Run Development Server**
+
+Open [http://192.168.1.9:3000](http://192.168.1.9:3000) in your browser (or localhost:3000).
 
 ### 4. Using the App
 
-1. **Sign up** with email and create profile
-2. **Choose your goal**: IELTS, Professional, or General Fluency
-3. **Navigate to dashboard** and tap "Hang out with SpeakMate"
-4. **Allow microphone access** when prompted
-5. **Tap the mic button** and start speaking in English
-6. **AI will respond** with voice and show real-time feedback
+1. **Choose your goal**: IELTS, Professional, or General Fluency
+2. **Navigate to "Hang out with SpeakMate"**
+3. **Allow microphone access** when prompted
+4. **Tap the mic button** to start conversation
+5. **Speak naturally** - AI will respond and conversation will flow like a phone call
+6. **Tap Exit** to end and view session summary with detailed feedback
 
 ### 5. Build for Production
 
@@ -69,38 +78,36 @@ npm run build
 npm start
 ```
 
-## 🎯 Next Steps
+## 🏗️ Architecture
 
-### Add Real AI Integration
+### Evaluation System
+- **Location**: `speakmate-ai/evaluator.js` (isolated module for continuous enhancement)
+- **Approach**: Hybrid AI + quantitative metrics
+- **AI Model**: OpenAI GPT-4o-mini (temperature: 0.3, max_tokens: 800)
+- **Metrics Analyzed**: 
+  - Vocabulary diversity (unique words / total words)
+  - Hesitation rate (um, uh, er markers)
+  - Discourse markers (however, moreover, therefore, etc.)
+  - Sentence complexity (subordinate clauses, relative clauses)
+  - Average sentence length
+  - Word repetitions
+- **Scoring**: 0-9 scale with 0.5 increments
+- **Criteria**: Fluency, Vocabulary, Grammar, Pronunciation (copyright-safe terminology)
+- **Output**: Scores + brief feedback + detailed feedback + metrics + improvement suggestions
 
-The app currently uses demo responses. To integrate real AI:
+### Speech-to-Text Integration
+- **Service**: ElevenLabs Scribe v2 Realtime
+- **Protocol**: WebSocket (wss://api.elevenlabs.io/v1/speech-to-text/realtime)
+- **Audio Format**: PCM 16kHz, int16
+- **Processing**: Web Audio API → ScriptProcessorNode → Gain Node (muted) → Base64 encoding
+- **Language**: English-locked (`language_code=en`)
+- **Commit Strategy**: VAD (Voice Activity Detection)
 
-1. **OpenAI Integration**:
-   ```bash
-   npm install openai
-   ```
-   
-   Update `src/app/api/chat/route.ts`:
-   ```typescript
-   import OpenAI from 'openai';
-   
-   const openai = new OpenAI({
-     apiKey: process.env.OPENAI_API_KEY,
-   });
-   
-   // Use openai.chat.completions.create()
-   ```
-
-2. **Add Voice Features**:
-   - Speech-to-text: Web Speech API or Whisper API
-   - Text-to-speech: Browser SpeechSynthesis or ElevenLabs
-
-3. **Enhanced Features**:
-   - Progress tracking and analytics
-   - Conversation history with database (Prisma + PostgreSQL)
-   - Grammar correction highlighting
-   - Vocabulary builder
-   - Speaking exercises and prompts
+### Key Features Implementation
+- **Phone Call Mode**: Mic button starts conversation, becomes non-interactive after start
+- **Auto-scroll**: Chat automatically scrolls to latest message
+- **Session Caching**: Evaluation results cached in sessionStorage for navigation between summary/detailed feedback
+- **Context-aware Evaluation**: Only student messages analyzed (not AI responses)
 
 ## 📁 Project Structure
 
@@ -108,18 +115,56 @@ The app currently uses demo responses. To integrate real AI:
 speakmate/
 ├── src/
 │   ├── app/
-│   │   ├── api/chat/        # Chat API endpoint
-│   │   ├── layout.tsx       # Root layout
-│   │   ├── page.tsx         # Home page with chat UI
-│   │   └── globals.css      # Global styles
-├── public/                  # Static assets
+│   │   ├── api/
+│   │   │   ├── chat/                    # AI conversation endpoint
+│   │   │   ├── evaluate-session/        # Evaluation API (imports evaluator.js)
+│   │   │   ├── scribe-token/            # ElevenLabs token generation
+│   │   │   └── elevenlabs-tts/          # Text-to-speech endpoint
+│   │   ├── hangout/
+│   │   │   ├── page.tsx                 # Main conversation interface
+│   │   │   ├── summary/page.tsx         # Session evaluation summary
+│   │   │   └── detailed-feedback/page.tsx # Detailed feedback breakdown
+│   │   ├── general/, ielts/, professional/ # Goal-based dashboards
+│   │   ├── layout.tsx                   # Root layout
+│   │   ├── page.tsx                     # Home page
+│   │   └── globals.css                  # Global styles
+│   ├── hooks/
+│   │   ├── useSpeechRecognition.ts      # ElevenLabs WebSocket STT hook
+│   │   └── useTextToSpeech.ts           # TTS hook
+│   └── components/
+│       └── Logo.tsx                     # SpeakMate logo component
+├── speakmate-ai/
+│   └── evaluator.js                     # Isolated evaluation engine (450+ lines)
+├── public/                              # Static assets
 ├── .github/
-│   └── copilot-instructions.md
+│   └── copilot-instructions.md          # Project context for GitHub Copilot
 ├── package.json
 ├── tsconfig.json
 ├── tailwind.config.ts
 └── next.config.ts
 ```
+
+## 🎯 Future Enhancements
+
+- [ ] Progress tracking across sessions
+- [ ] Audio analysis for pronunciation feedback
+- [ ] Fine-tune evaluation rubric for different proficiency levels
+- [ ] Add more quantitative metrics (filler word patterns, pauses, speech rate)
+- [ ] User authentication and conversation history
+- [ ] Database integration for progress analytics
+- [ ] Custom practice scenarios and prompts
+- [ ] Export conversation transcripts
+
+## 🔒 Git Repository
+
+This project uses git for version control. Current milestone:
+
+**MILESTONE: Hybrid AI Evaluator with Quantitative Metrics** (commit: `aa6dc41`)
+- Isolated evaluation engine
+- AI + metrics approach
+- All features functional and tested
+
+To view history: `git log --oneline`
 
 ## 🤝 Contributing
 
