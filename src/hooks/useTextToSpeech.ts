@@ -1,11 +1,19 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export function useTextToSpeech() {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const speak = useCallback(async (text: string) => {
     const trimmed = text?.trim();
     if (!trimmed) return;
+
+    // Stop any currently playing audio first
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
 
     try {
       // Call ElevenLabs TTS API
@@ -22,10 +30,12 @@ export function useTextToSpeech() {
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
+      audioRef.current = audio;
 
       audio.onended = () => {
         URL.revokeObjectURL(url);
         setIsSpeaking(false);
+        audioRef.current = null;
       };
 
       setIsSpeaking(true);
@@ -36,6 +46,9 @@ export function useTextToSpeech() {
       // Browser fallback
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         try {
+          // Cancel any existing speech first
+          window.speechSynthesis.cancel();
+          
           const utterance = new SpeechSynthesisUtterance(trimmed);
           utterance.onend = () => setIsSpeaking(false);
           utterance.onerror = () => setIsSpeaking(false);
@@ -53,9 +66,18 @@ export function useTextToSpeech() {
   }, []);
 
   const stop = useCallback(() => {
+    // Stop ElevenLabs audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    
+    // Stop browser TTS
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
+    
     setIsSpeaking(false);
   }, []);
 

@@ -104,6 +104,12 @@ function HangoutContent() {
       const trimmed = text.trim();
       if (!trimmed) return;
 
+      // Ignore if AI is currently speaking (prevents echo)
+      if (isSpeaking) {
+        console.log("[Hangout] Ignoring transcript while AI is speaking:", trimmed);
+        return;
+      }
+
       addTranscriptMessage("user", trimmed);
       
       // Call OpenAI API
@@ -149,7 +155,7 @@ function HangoutContent() {
         );
       }
     },
-    [addTranscriptMessage, speakText, userName, isFirstEverHangout, lastHangoutAt, sameSession]
+    [addTranscriptMessage, speakText, isSpeaking, userName, isFirstEverHangout, lastHangoutAt, sameSession]
   );
 
   // Auto-scroll to bottom when transcript updates
