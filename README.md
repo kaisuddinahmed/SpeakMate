@@ -179,18 +179,20 @@ speakmate/
 
 This project uses git for version control. Current milestones:
 
-**Latest: Backend Reorganization Complete** (commit: `e6c0d0d`)
+**Latest: Backend Reorganization Complete** (tag: `v1.1-backend-reorganized`, commit: `cb929a4`)
 - Organized API structure (hangout/, evaluation/)
 - TypeScript evaluation engine with full type safety
 - Migrated all routes, updated frontend
 - All features tested and working
+- Zero breaking changes
 
 **Previous: Hybrid AI Evaluator with Quantitative Metrics** (commit: `aa6dc41`)
 - Isolated evaluation engine
 - AI + metrics approach
 - All features functional and tested
 
-To view history: `git log --oneline`
+To view history: `git log --oneline --decorate`
+To checkout milestone: `git checkout v1.1-backend-reorganized`
 
 ## 🤝 Contributing
 
