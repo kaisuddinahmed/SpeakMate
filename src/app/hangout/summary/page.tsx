@@ -214,22 +214,19 @@ function SummaryContent() {
 
           {/* Session Stats */}
           <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-600 dark:to-gray-500 rounded-2xl p-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Session Stats</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Duration</p>
-                <p className="text-2xl font-bold text-gray-800 dark:text-white">{summary.duration}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Messages</p>
-                <p className="text-2xl font-bold text-gray-800 dark:text-white">{summary.messageCount}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="font-semibold">{summary.duration}</span> • <span className="font-semibold">{summary.messageCount}</span> messages
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Overall Proficiency */}
+          {/* Overall Score + Performance Grid */}
           {summary.messageCount > 0 && (
             <div className="bg-gradient-to-r from-green-100 to-blue-100 dark:from-gray-600 dark:to-gray-500 rounded-2xl p-6 shadow-lg border-2 border-green-200 dark:border-gray-500">
+              {/* Overall Score */}
               <div className="text-center mb-6">
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Session Score</p>
                 <div className="relative inline-flex items-center justify-center">
@@ -242,86 +239,115 @@ function SummaryContent() {
                   for exam preparation only.
                 </p>
               </div>
+
+              {/* 2x2 Score Grid */}
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                {/* Fluency */}
+                <div className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                  <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-2">
+                    <svg className="w-20 h-20 transform -rotate-90">
+                      <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-200 dark:text-gray-600" />
+                      <circle 
+                        cx="40" 
+                        cy="40" 
+                        r="32" 
+                        stroke="currentColor" 
+                        strokeWidth="6" 
+                        fill="none" 
+                        strokeDasharray={`${2 * Math.PI * 32}`}
+                        strokeDashoffset={`${2 * Math.PI * 32 * (1 - summary.fluency / 9)}`}
+                        className="text-blue-500 transition-all duration-500"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute text-lg font-bold text-gray-800 dark:text-white">{summary.fluency.toFixed(1)}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Fluency</p>
+                </div>
+
+                {/* Vocabulary */}
+                <div className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                  <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-2">
+                    <svg className="w-20 h-20 transform -rotate-90">
+                      <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-200 dark:text-gray-600" />
+                      <circle 
+                        cx="40" 
+                        cy="40" 
+                        r="32" 
+                        stroke="currentColor" 
+                        strokeWidth="6" 
+                        fill="none" 
+                        strokeDasharray={`${2 * Math.PI * 32}`}
+                        strokeDashoffset={`${2 * Math.PI * 32 * (1 - summary.vocabulary / 9)}`}
+                        className="text-purple-500 transition-all duration-500"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute text-lg font-bold text-gray-800 dark:text-white">{summary.vocabulary.toFixed(1)}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Vocabulary</p>
+                </div>
+
+                {/* Grammar */}
+                <div className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                  <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-2">
+                    <svg className="w-20 h-20 transform -rotate-90">
+                      <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-200 dark:text-gray-600" />
+                      <circle 
+                        cx="40" 
+                        cy="40" 
+                        r="32" 
+                        stroke="currentColor" 
+                        strokeWidth="6" 
+                        fill="none" 
+                        strokeDasharray={`${2 * Math.PI * 32}`}
+                        strokeDashoffset={`${2 * Math.PI * 32 * (1 - summary.grammar / 9)}`}
+                        className="text-green-500 transition-all duration-500"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute text-lg font-bold text-gray-800 dark:text-white">{summary.grammar.toFixed(1)}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Grammar</p>
+                </div>
+
+                {/* Pronunciation */}
+                <div className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                  <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-2">
+                    <svg className="w-20 h-20 transform -rotate-90">
+                      <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-200 dark:text-gray-600" />
+                      <circle 
+                        cx="40" 
+                        cy="40" 
+                        r="32" 
+                        stroke="currentColor" 
+                        strokeWidth="6" 
+                        fill="none" 
+                        strokeDasharray={`${2 * Math.PI * 32}`}
+                        strokeDashoffset={`${2 * Math.PI * 32 * (1 - summary.pronunciation / 9)}`}
+                        className="text-orange-500 transition-all duration-500"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute text-lg font-bold text-gray-800 dark:text-white">{summary.pronunciation.toFixed(1)}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Pronunciation</p>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Performance Breakdown */}
-          {summary.messageCount > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-2 border-gray-100 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Performance Breakdown</h3>
-            
-            <div className="space-y-4">
-              {/* Fluency */}
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Fluency</span>
-                  <span className="text-sm font-bold text-blue-600">{summary.fluency.toFixed(1)}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(summary.fluency / 9) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Vocabulary */}
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Vocabulary</span>
-                  <span className="text-sm font-bold text-purple-600">{summary.vocabulary.toFixed(1)}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(summary.vocabulary / 9) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Grammar */}
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Grammar</span>
-                  <span className="text-sm font-bold text-green-600">{summary.grammar.toFixed(1)}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(summary.grammar / 9) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Pronunciation */}
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pronunciation</span>
-                  <span className="text-sm font-bold text-orange-600">{summary.pronunciation.toFixed(1)}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(summary.pronunciation / 9) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          )}
-
-          {/* Brief Feedback */}
+          {/* Feedback with Detail Button */}
           {summary.messageCount > 0 && briefFeedback && (
             <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-6 border-2 border-yellow-200 dark:border-gray-500">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">Feedback</h3>
-              <p className="text-gray-700 dark:text-gray-200 leading-relaxed mb-4">
+              <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed mb-4">
                 {briefFeedback}
               </p>
               <button
                 onClick={goToDetailedFeedback}
                 className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-md flex items-center justify-center gap-2"
               >
-                <span>Detail Feedback</span>
+                <span>View Detailed Feedback</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
