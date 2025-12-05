@@ -2309,10 +2309,10 @@ Remember: You're a conversation partner, not just a teacher. Make the practice e
                 <p className="text-[11px] font-semibold text-gray-800 dark:text-white leading-tight">Hangout with SpeakMate</p>
               </a>
 
-              {/* 2. Practice Real Situation */}
+              {/* 2. Roleplay */}
               <a href="/professional/situations" className="bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:bg-gray-800 rounded-xl p-3 shadow-[0_10px_20px_rgba(0,0,0,0.15),0_3px_6px_rgba(255,255,255,0.9)_inset,0_-2px_6px_rgba(0,0,0,0.1)_inset] text-center hover:shadow-2xl transition-all active:scale-95 border-2 border-white/80 backdrop-blur-sm aspect-square flex flex-col items-center justify-center">
                 <div className="w-9 h-9 mb-2 rounded-lg bg-gradient-to-br from-yellow-400 to-lime-500 flex items-center justify-center text-xl">💼</div>
-                <p className="text-[11px] font-semibold text-gray-800 dark:text-white leading-tight">Practice in Real Situation</p>
+                <p className="text-[11px] font-semibold text-gray-800 dark:text-white leading-tight">Roleplay</p>
               </a>
 
               {/* 3. Real Situation Videos */}
@@ -2484,10 +2484,10 @@ Remember: You're a conversation partner, not just a teacher. Make the practice e
               <p className="text-[11px] font-semibold text-gray-800 dark:text-white leading-tight">Hangout with SpeakMate</p>
             </a>
 
-            {/* 2. Practice Real Situation */}
+            {/* 2. Roleplay */}
             <a href="/general/situations" className="bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:bg-gray-800 rounded-xl p-3 shadow-[0_10px_20px_rgba(0,0,0,0.15),0_3px_6px_rgba(255,255,255,0.9)_inset,0_-2px_6px_rgba(0,0,0,0.1)_inset] text-center hover:shadow-2xl transition-all active:scale-95 border-2 border-white/80 backdrop-blur-sm aspect-square flex flex-col items-center justify-center">
               <div className="w-9 h-9 mb-2 rounded-lg bg-gradient-to-br from-yellow-400 to-lime-500 flex items-center justify-center text-xl">☕</div>
-              <p className="text-[11px] font-semibold text-gray-800 dark:text-white leading-tight">Practice in Real Situation</p>
+              <p className="text-[11px] font-semibold text-gray-800 dark:text-white leading-tight">Roleplay</p>
             </a>
 
             {/* 3. Real Situation Videos */}
