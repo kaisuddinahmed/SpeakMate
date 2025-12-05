@@ -237,7 +237,10 @@ function SummaryContent() {
                     {summary.overallProficiency.toFixed(1)}
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Unofficial score — for practice use only.</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center leading-relaxed">
+                  This score is an unofficial estimate<br />
+                  for exam preparation only.
+                </p>
               </div>
             </div>
           )}
