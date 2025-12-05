@@ -132,6 +132,67 @@ Do not add any extra text outside the JSON.
 
 // ============ ANALYSIS HELPER FUNCTIONS ============
 
+// Common English words to exclude from vocabulary diversity calculation
+// Based on frequency analysis - top ~300 most common words
+const COMMON_WORDS = new Set([
+  // Articles
+  "a", "an", "the",
+  // Pronouns
+  "i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them",
+  "my", "your", "his", "her", "its", "our", "their", "mine", "yours", "hers", "ours", "theirs",
+  "this", "that", "these", "those", "who", "what", "which", "whom", "whose",
+  // Common verbs
+  "be", "is", "am", "are", "was", "were", "been", "being",
+  "have", "has", "had", "having",
+  "do", "does", "did", "doing", "done",
+  "will", "would", "should", "could", "can", "may", "might", "must",
+  "go", "goes", "went", "going", "gone",
+  "get", "gets", "got", "getting", "gotten",
+  "make", "makes", "made", "making",
+  "know", "knows", "knew", "knowing", "known",
+  "think", "thinks", "thought", "thinking",
+  "take", "takes", "took", "taking", "taken",
+  "see", "sees", "saw", "seeing", "seen",
+  "come", "comes", "came", "coming",
+  "want", "wants", "wanted", "wanting",
+  "look", "looks", "looked", "looking",
+  "use", "uses", "used", "using",
+  "find", "finds", "found", "finding",
+  "give", "gives", "gave", "giving", "given",
+  "tell", "tells", "told", "telling",
+  "work", "works", "worked", "working",
+  "call", "calls", "called", "calling",
+  "try", "tries", "tried", "trying",
+  "ask", "asks", "asked", "asking",
+  "need", "needs", "needed", "needing",
+  "feel", "feels", "felt", "feeling",
+  "become", "becomes", "became", "becoming",
+  "leave", "leaves", "left", "leaving",
+  "put", "puts", "putting",
+  // Prepositions
+  "in", "on", "at", "to", "for", "of", "with", "from", "by", "about", "as",
+  "into", "through", "during", "before", "after", "above", "below", "between",
+  "under", "over", "up", "down", "out", "off", "again", "then",
+  // Conjunctions
+  "and", "but", "or", "so", "because", "if", "when", "while", "than",
+  // Common adjectives
+  "good", "new", "first", "last", "long", "great", "little", "own", "other",
+  "old", "right", "big", "high", "different", "small", "large", "next", "early",
+  "young", "important", "few", "public", "bad", "same", "able",
+  // Common adverbs
+  "not", "just", "very", "too", "also", "well", "only", "even", "back", "still",
+  "more", "most", "much", "many", "some", "all", "any", "both", "each", "every",
+  "here", "there", "where", "now", "then", "always", "never", "often", "really",
+  // Numbers
+  "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+  // Other common
+  "yes", "no", "ok", "okay", "yeah", "yep", "nope", "sure", "maybe", "please",
+  "thank", "thanks", "sorry", "hello", "hi", "hey", "bye", "goodbye",
+  "thing", "things", "people", "person", "time", "times", "day", "days",
+  "year", "years", "way", "ways", "man", "men", "woman", "women", "child", "children",
+  "life", "world", "place", "case", "group", "number", "part", "problem", "fact"
+]);
+
 function analyzeTranscriptMetrics(transcript: TranscriptMessage[]): TranscriptMetrics {
   // Extract only student messages
   const studentMessages = transcript
@@ -155,13 +216,17 @@ function analyzeTranscriptMetrics(transcript: TranscriptMessage[]): TranscriptMe
   }
 
   const words = studentMessages.match(/\b\w+\b/g) || [];
-  const uniqueWords = new Set(words.map((w) => w.toLowerCase()));
+  
+  // Filter out common words for vocabulary diversity calculation
+  const contentWords = words.filter(w => !COMMON_WORDS.has(w.toLowerCase()));
+  const uniqueContentWords = new Set(contentWords.map((w) => w.toLowerCase()));
+  
   const sentences = studentMessages.match(/[.!?]+/g) || ["."];
 
   return {
     totalWords: words.length,
-    uniqueWords: uniqueWords.size,
-    lexicalDiversity: words.length > 0 ? uniqueWords.size / words.length : 0,
+    uniqueWords: uniqueContentWords.size, // Now counts only content words
+    lexicalDiversity: contentWords.length > 0 ? uniqueContentWords.size / contentWords.length : 0,
     hesitationMarkers: countHesitationMarkers(studentMessages),
     discourseMarkers: countDiscourseMarkers(studentMessages),
     sentenceCount: sentences.length,
