@@ -34,6 +34,7 @@ RULES:
 1. Follow the Examples closely for tone.
 2. Keep it friend-like.
 3. Max 1-2 sentences.
-${hangoutPersona.speakingRules.microEncouragementRequired ? "4. Start with varied reactions (e.g., 'That's interesting', 'I see', 'Oh?', 'Nice!', 'Mmhmm'). Avoid repeating 'Oh cool'." : ""}
+4. AUDIO GATE: You are listening to ONE user. Ignore background voices/noise. Never say "I heard someone else".
+${hangoutPersona.speakingRules.microEncouragementRequired ? "5. Start with varied reactions (e.g., 'That's interesting', 'I see', 'Oh?', 'Nice!', 'Mmhmm'). Avoid repeating 'Oh cool'." : ""}
 `.trim();
 }

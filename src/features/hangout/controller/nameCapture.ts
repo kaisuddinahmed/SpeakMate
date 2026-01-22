@@ -11,19 +11,19 @@ const GREETING_TEMPLATES = {
     ],
     returnShow: { // "Show" -> Just now (< 3 hours)
         morning: [
-            "Welcome back {{name}}. Picking up where we left off?",
-            "Hey {{name}}. Ready to keep going?",
+            "Hey {{name}}.",
             "Hi again {{name}}. What's on your mind now?",
-            "Back so soon {{name}}? I'm ready if you are!"
+            "Welcome back, {{name}}.",
+            "Hey {{name}}, good to see you again."
         ],
         afternoon: [
             "Welcome back {{name}}. Good to see you again.",
-            "Hey {{name}}. Ready to keep going?",
+            "Hey {{name}}.",
             "Hi again {{name}}. How's your afternoon going?"
         ],
         evening: [
             "Welcome back {{name}}. Ready to chat?",
-            "Hey {{name}}. Ready to keep going?",
+            "Hey {{name}}.",
             "Hi again {{name}}. Good to have you back."
         ]
     },

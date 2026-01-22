@@ -35,6 +35,8 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
 
     const messagesRef = useRef<Message[]>([]);
 
+    const lockedSpeakerRef = useRef<number | null>(null);
+
     // Sync Ref
     useEffect(() => {
         messagesRef.current = messages;
@@ -136,6 +138,7 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
         try {
             // Force Cleanup First (Avoid Zombies)
             cleanupResources();
+            lockedSpeakerRef.current = null; // Reset lock on new connection
 
             const response = await fetch('/api/deepgram');
             const { key } = await response.json();
@@ -168,9 +171,9 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
             source.connect(processor);
             processor.connect(ctx.destination);
 
-            // Setup WebSocket
+            // Setup WebSocket (Added diarize=true)
             const ws = new WebSocket(
-                'wss://api.deepgram.com/v1/listen?model=nova-2&language=en&smart_format=true&interim_results=true&endpointing=1500&encoding=linear16&sample_rate=16000&channels=1',
+                'wss://api.deepgram.com/v1/listen?model=nova-2&language=en&smart_format=true&interim_results=true&endpointing=1500&encoding=linear16&sample_rate=16000&channels=1&diarize=true',
                 ['token', key]
             );
             sttWsRef.current = ws;
@@ -186,7 +189,13 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                const transcript = data.channel?.alternatives?.[0]?.transcript;
+                const alternative = data.channel?.alternatives?.[0];
+                const transcript = alternative?.transcript;
+
+                // SVL: Simple Voice Lock
+                // Deepgram provides 'words' array with 'speaker' field if diarize=true
+                // We use the speaker of the first word as the dominant speaker for this chunk.
+                const detectedSpeaker = alternative?.words?.[0]?.speaker;
 
                 if (transcript) {
                     // BARGE-IN logic
@@ -197,6 +206,22 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
                     }
 
                     if (data.is_final) {
+                        // --- SVL: GATEKEEPER ---
+                        if (typeof detectedSpeaker === 'number') {
+                            // 1. Lock if unlocked (First Turn)
+                            if (lockedSpeakerRef.current === null) {
+                                console.log(`[SVL] 🔒 Locking Session to Speaker ${detectedSpeaker}`);
+                                lockedSpeakerRef.current = detectedSpeaker;
+                            }
+
+                            // 2. Gate (Check Lock)
+                            if (lockedSpeakerRef.current !== detectedSpeaker) {
+                                console.log(`[SVL] 🛡️ Ignored Speaker ${detectedSpeaker} (Locked to ${lockedSpeakerRef.current}). Transcript: "${transcript}"`);
+                                return; // REJECT
+                            }
+                        }
+                        // If speaker is undefined (rare for final), we let it pass or apply strict mode. Let's let it pass for robustness.
+
                         // Deduplication Check
                         const now = Date.now();
                         if (lastProcessedRef.current &&
@@ -224,6 +249,8 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
                             console.log('⏳ Incomplete thought. Waiting...');
                         }
                     } else {
+                        // Interim - Optional: Can also gate visual interim if we have speaker info (often we don't for interim)
+                        // For now, let interim show for responsiveness, but only finalize if valid.
                         setInterimTranscript(transcript);
                     }
                 }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAudioTurnManager, Message } from '../audio/useAudioTurnManager';
 import {
     buildPrompt,
@@ -149,6 +149,9 @@ export function useConversationController(initialTopic: Part1Domain = 'introduct
         onUserTurn: processUserTurn
     });
 
+    // Unpack state for Silence Breaker
+    const { state } = audioManager;
+
     // --- 4. Greeting Logic (Session Entry) ---
     const startSession = useCallback(async () => {
         if (audioManager.isListening) return;
@@ -182,6 +185,38 @@ export function useConversationController(initialTopic: Part1Domain = 'introduct
         setPhase("PART1");
 
     }, [audioManager]);
+
+    // --- 5. Silence Breaker (Post-Greeting) ---
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+
+        // Condition: Just listened to greeting (turn 0), waiting for user (LISTENING), phase is SESSION_ENTRY or PART1
+        // Note: startSession sets phase to PART1 immediately.
+        if (state === 'LISTENING' && turnCountRef.current === 0) {
+            console.log("[SilenceBreaker] Timer started (6s)...");
+            timer = setTimeout(() => {
+                console.log("[SilenceBreaker] Silence detected! Nudging user...");
+
+                // Random Natural Nudges
+                const nudges = [
+                    "Everything okay?",
+                    "I'm listening.",
+                    "Take your time.",
+                    "You there?",
+                    "Ready when you are."
+                ];
+                const randomNudge = nudges[Math.floor(Math.random() * nudges.length)];
+
+                // Speak directly (bypassing LLM for speed/cost)
+                audioManager.speak(randomNudge);
+
+            }, 6000); // 6 seconds
+        }
+
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [state]); // Re-runs when state changes (e.g. LISTENING -> SPEAKING -> LISTENING)
 
     return {
         ...audioManager,
