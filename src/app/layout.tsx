@@ -6,7 +6,7 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SpeakMate - AI English Fluency Coach",
+  title: "SpeakMate - Your English Speaking Buddy",
   description: "Your AI-powered English fluency companion for IELTS preparation and conversation practice",
   manifest: "/manifest.json",
   appleWebApp: {

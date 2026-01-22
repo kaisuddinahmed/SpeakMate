@@ -197,25 +197,40 @@ export async function POST(req: NextRequest) {
       (m) => m.role === "assistant"
     );
 
-    const greetingInstruction = buildGreetingInstruction({
-      userName: metadata.userName,
-      isFirstEverHangout: metadata.isFirstEverHangout,
-      lastHangoutAt: metadata.lastHangoutAt,
-      sameSession: metadata.sameSession,
-      hasAssistantMessages,
-    });
-
-    const chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      {
-        role: "system",
-        content: SPEAKMATE_SYSTEM_PROMPT,
-      },
-      {
-        role: "system",
-        content: greetingInstruction,
-      },
-      ...messages,
-    ];
+    // Only send greeting instructions for the first message (no assistant messages)
+    let chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
+    if (!hasAssistantMessages) {
+      // First message: system prompt + greeting
+      const safeName = metadata.userName?.trim() && metadata.userName.trim().length > 0 ? metadata.userName.trim() : "friend";
+      const greetingInstruction = `
+        Start with a soft, warm, emotionally supportive greeting. Always address the user by name at the start: "Hi ${safeName}, it’s really nice to meet you! I hope you’re having a lovely day."
+        Use gentle, inviting language. Example phrases:
+        - "Hi ${safeName}, I’m so glad you’re here. How are you feeling today?"
+        - "Hey ${safeName}, it’s wonderful to chat with you. What’s something fun or interesting you’ve been up to lately?"
+        - "Hello ${safeName}, I hope you’re having a peaceful morning. Is there anything you’d like to talk about?"
+        End with an open, gentle question that encourages sharing. Make the user feel welcomed, valued, and comfortable to continue talking. Avoid sounding scripted or formal.
+      `.trim();
+      chatMessages = [
+        {
+          role: "system",
+          content: `You are SpeakMate, a warm, friendly conversational companion who helps users feel relaxed and confident speaking English. You are NOT a teacher, NOT an examiner, and NOT a coach. You simply have pleasant, human-like conversations. Keep replies short, ask open-ended questions, and maintain a soft, friendly, natural tone.`,
+        },
+        {
+          role: "system",
+          content: greetingInstruction,
+        },
+        ...messages,
+      ];
+    } else {
+      // Subsequent messages: only system prompt
+      chatMessages = [
+        {
+          role: "system",
+          content: `You are SpeakMate, a warm, friendly conversational companion who helps users feel relaxed and confident speaking English. You are NOT a teacher, NOT an examiner, and NOT a coach. You simply have pleasant, human-like conversations. Keep replies short, ask open-ended questions, and maintain a soft, friendly, natural tone.`,
+        },
+        ...messages,
+      ];
+    }
 
     const completion = await openai.chat.completions.create({
       model: MODEL,

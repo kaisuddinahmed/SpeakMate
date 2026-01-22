@@ -4,34 +4,45 @@ Your friendly AI companion to improve English fluency through natural conversati
 
 ## ✨ Features
 
-- 🎤 **Real-time Voice Conversation** - ElevenLabs WebSocket STT with low-latency transcription
-- 💬 **Interactive Chat Interface** - Auto-scrolling chat with conversation history
-- 📞 **Phone Call Mode** - Natural conversation flow with mic button toggle
-- 🎯 **AI-Powered Evaluation** - Hybrid approach combining GPT-4o-mini with quantitative metrics
-- 📊 **Detailed Feedback** - Session scores with structured recommendations
-- 🎯 **Goal-based Learning** - Choose between IELTS Prep, Professional English, or General Fluency
-- 🎨 **Modern UI** - Beautiful, responsive design with dark mode support
-- 🔊 **Speech Recognition** - ElevenLabs Scribe v2 Realtime (English-locked)
-- 🗣️ **Text-to-Speech** - Natural AI voice responses
-- 🚀 **Fast & Lightweight** - Built with Next.js 15 and React 19
-- 📈 **Quantitative Metrics** - Vocabulary diversity, hesitation rate, discourse markers, sentence complexity
+### Conversation Intelligence
+- 🧠 **Modular AI Pipeline** - Low-latency architecture combining optimized STT, Intelligence, and TTS
+- 🎤 **Smart VAD (Voice Activity Detection)** - Custom-tuned silence detection (-35dB / 600ms) for natural turn-taking
+- 💭 **Conversation Memory** - Remembers personal facts, preferences, and past discussions
+- 🔄 **Contextual Transitions** - 90+ natural phrases for smooth topic changes
+- 👤 **Personal Fact Extraction** - Learns about you (profession, family, hobbies) automatically
+- 📊 **Real-time Topic Display** - Visual indicators for current conversation themes
+
+### Gamification & Motivation
+- 🔥 **Streak Tracking** - Daily practice streaks with badge display
+- 🎉 **Milestone Celebrations** - Animated achievements (3 to 365 days)
+- 📈 **Conversation Phases** - Visual indicators (Introduction → Exploration → Deep Dive)
+
+### Evaluation & Feedback
+- 🎯 **AI-Powered Evaluation** - Hybrid scoring (GPT-4o-mini + quantitative metrics)
+- 📝 **Full Transcript with Corrections** - WhatsApp-style chat history with inline Major/Minor mistake classification (Uses Smart Fuzzy Matching)
+- 📊 **Detailed Session Scoring** - Criteria-based feedback (Fluency, Vocabulary, Grammar, Pronunciation)
+- 📋 **Actionable Feedback** - Structured recommendations for improvement based on weakest criteria
+
+### User Experience
+- 📞 **Phone Call Mode** - Natural conversation flow with minimal interface
+- 🌊 **Adaptive Cooldown** - Dynamic pause handling (0-150ms) for snappy responses
+- 🎨 **Modern UI** - Dark mode, auto-scrolling, and responsive design
+- 🗣️ **Natural AI Voice** - OpenAI `nova` voice for warm, human-like interaction
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15 (App Router), React 19, TypeScript
 - **Styling**: Tailwind CSS
-- **AI Conversation**: OpenAI GPT-4o-mini
-- **AI Evaluation**: OpenAI GPT-4o-mini with quantitative metrics layer
-- **Speech-to-Text**: ElevenLabs Scribe v2 Realtime (WebSocket)
-- **Text-to-Speech**: ElevenLabs TTS
-- **Audio Processing**: Web Audio API (ScriptProcessorNode, gain nodes)
+- **Intelligence**: OpenAI GPT-4o-mini (Optimized for speed/cost)
+- **Speech-to-Text (STT)**: OpenAI Whisper (`whisper-1`)
+- **Text-to-Speech (TTS)**: OpenAI TTS (`tts-1`, voice: `nova`)
+- **Audio Processing**: Custom Web Audio API VAD (-35dB / 600ms)
+- **State Management**: React Hooks + LocalStorage/SessionStorage
 
 ## 📋 Prerequisites
 
-- Node.js 24.11.1 (installed via NVM)
-- npm package manager
-- OpenAI API key
-- ElevenLabs API key
+- Node.js 18+ (20+ recommended)
+- **OpenAI API Key** (Required for STT, LLM, and TTS)
 
 ## 🚀 Getting Started
 
@@ -46,162 +57,54 @@ npm install
 Create `.env.local` with:
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
-ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
 ```
-
-⚠️ **Never commit `.env.local` to git** - it's already in `.gitignore`
 
 ### 3. Run Development Server
 
 ```bash
-# Make sure you're using the correct Node version
-export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && npm run dev
+npm run dev
 ```
 
-Or use the VS Code task: **Run Development Server**
-
-Open [http://192.168.1.9:3000](http://192.168.1.9:3000) in your browser (or localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 4. Using the App
 
-1. **Choose your goal**: IELTS, Professional, or General Fluency
-2. **Navigate to "Hang out with SpeakMate"**
-3. **Allow microphone access** when prompted
-4. **Tap the mic button** to start conversation
-5. **Speak naturally** - AI will respond and conversation will flow like a phone call
-6. **Tap Exit** to end and view session summary with detailed feedback
-
-### 5. Build for Production
-
-```bash
-npm run build
-npm start
-```
+1.  **Select Goal**: Choose IELTS, Professional, or General.
+2.  **Start Hangout**: Click the mic button.
+3.  **Speak**: The AI listens for speech (VAD) and responds automatically.
+    *   *Tip: Use the "Exit" button to see your detailed evaluation.*
 
 ## 🏗️ Architecture
 
-### Backend Structure
-- **API Routes**:
-  - `api/hangout/` - Conversation management
-    - `conversation/` - AI chat responses (GPT-4o-mini)
-    - `voice/` - ElevenLabs STT token generation
-    - `speech/` - Text-to-speech synthesis
-  - `api/evaluation/` - Session analysis
-    - `session/` - Post-hangout comprehensive evaluation
-    - `transcript/` - (Future) Detailed transcript review with corrections
-- **Core Logic**:
-  - `lib/features/evaluation/evaluator.ts` - TypeScript evaluation engine with full type safety
+### Modular Pipeline (Current)
+Instead of a single WebSocket, SpeakMate uses a robust 3-stage pipeline for maximum control and reliability:
 
-### Evaluation System
-- **Location**: `src/lib/features/evaluation/evaluator.ts` (TypeScript with comprehensive types)
-- **Approach**: Hybrid AI + quantitative metrics
-- **AI Model**: OpenAI GPT-4o-mini (temperature: 0.3, max_tokens: 800)
-- **Metrics Analyzed**: 
-  - Vocabulary diversity (unique words / total words)
-  - Hesitation rate (um, uh, er markers)
-  - Discourse markers (however, moreover, therefore, etc.)
-  - Sentence complexity (subordinate clauses, relative clauses)
-  - Average sentence length
-  - Word repetitions
-- **Scoring**: 0-9 scale with 0.5 increments
-- **Criteria**: Fluency, Vocabulary, Grammar, Pronunciation (copyright-safe terminology)
-- **Output**: Scores + brief feedback + detailed feedback + metrics + improvement suggestions
+1.  **Input (Client)**:
+    *   `useSmartVAD.ts` monitors audio volume.
+    *   On silence (600ms), audio is sliced and sent to API.
+2.  **Processing (Server)**:
+    *   **STT**: `api/hangout/transcribe` (Whisper) converts audio to text.
+    *   **LLM**: `api/hangout/conversation` (GPT-4o-mini) generates reply + metadata (topics, corrections).
+    *   **TTS**: `api/hangout/speech` (OpenAI TTS) generates audio.
+3.  **Output (Client)**:
+    *   Audio is played via `useTextToSpeech.ts`.
+    *   State machine returns to "Listening" via Adaptive Cooldown.
 
-### Speech-to-Text Integration
-- **Service**: ElevenLabs Scribe v2 Realtime
-- **Protocol**: WebSocket (wss://api.elevenlabs.io/v1/speech-to-text/realtime)
-- **Audio Format**: PCM 16kHz, int16
-- **Processing**: Web Audio API → ScriptProcessorNode → Gain Node (muted) → Base64 encoding
-- **Language**: English-locked (`language_code=en`)
-- **Commit Strategy**: VAD (Voice Activity Detection)
+### Key Directories
 
-### Key Features Implementation
-- **Phone Call Mode**: Mic button starts conversation, becomes non-interactive after start
-- **Auto-scroll**: Chat automatically scrolls to latest message
-- **Session Caching**: Evaluation results cached in sessionStorage for navigation between summary/detailed feedback
-- **Context-aware Evaluation**: Only student messages analyzed (not AI responses)
-
-## 📁 Project Structure
-
-```
-speakmate/
-├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── hangout/
-│   │   │   │   ├── conversation/        # AI conversation endpoint (GPT-4o-mini)
-│   │   │   │   ├── voice/               # ElevenLabs STT token generation
-│   │   │   │   └── speech/              # Text-to-speech endpoint
-│   │   │   └── evaluation/
-│   │   │       ├── session/             # Post-session evaluation API
-│   │   │       └── transcript/          # (Future) Transcript review with corrections
-│   │   ├── hangout/
-│   │   │   ├── page.tsx                 # Main conversation interface
-│   │   │   ├── summary/page.tsx         # Session evaluation summary
-│   │   │   └── detailed-feedback/page.tsx # Detailed feedback breakdown
-│   │   ├── general/, ielts/, professional/ # Goal-based dashboards
-│   │   ├── layout.tsx                   # Root layout
-│   │   ├── page.tsx                     # Home page
-│   │   └── globals.css                  # Global styles
-│   ├── lib/
-│   │   ├── features/
-│   │   │   └── evaluation/
-│   │   │       └── evaluator.ts         # TypeScript evaluation engine (450+ lines)
-│   │   └── services/                    # (Future) External service integrations
-│   ├── hooks/
-│   │   ├── useSpeechRecognition.ts      # ElevenLabs WebSocket STT hook
-│   │   └── useTextToSpeech.ts           # TTS hook
-│   └── components/
-│       └── Logo.tsx                     # SpeakMate logo component
-├── speakmate-ai/                        # Legacy (deprecated - migrated to src/lib/)
-│   └── evaluator.js                     # Old JS evaluator (use TypeScript version)
-├── public/                              # Static assets
-├── .github/
-│   └── copilot-instructions.md          # Project context for GitHub Copilot
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
-└── next.config.ts
-```
-
-## 🎯 Future Enhancements
-
-- [ ] Progress tracking across sessions
-- [ ] Audio analysis for pronunciation feedback
-- [ ] Fine-tune evaluation rubric for different proficiency levels
-- [ ] Add more quantitative metrics (filler word patterns, pauses, speech rate)
-- [ ] User authentication and conversation history
-- [ ] Database integration for progress analytics
-- [ ] Custom practice scenarios and prompts
-- [ ] Export conversation transcripts
-
-## 🔒 Git Repository
-
-This project uses git for version control. Current milestones:
-
-**Latest: Backend Reorganization Complete** (tag: `v1.1-backend-reorganized`, commit: `cb929a4`)
-- Organized API structure (hangout/, evaluation/)
-- TypeScript evaluation engine with full type safety
-- Migrated all routes, updated frontend
-- All features tested and working
-- Zero breaking changes
-
-**Previous: Hybrid AI Evaluator with Quantitative Metrics** (commit: `aa6dc41`)
-- Isolated evaluation engine
-- AI + metrics approach
-- All features functional and tested
-
-To view history: `git log --oneline --decorate`
-To checkout milestone: `git checkout v1.1-backend-reorganized`
+| Path | Purpose |
+|------|---------|
+| `src/app/hangout/page.tsx` | Main conversation UI & State Machine |
+| `src/hooks/useSmartVAD.ts` | Custom VAD logic (-35dB threshold) |
+| `src/lib/utils/topicManager.ts` | 9-topic smart switching algorithm |
+| `src/lib/services/evaluation.ts` | IELTS scoring (Fluency/Vocab/Grammar/Pron) |
+| `src/app/hangout/transcript/` | Full chat view with Fuzzy-Matched corrections |
+| `src/app/hangout/detailed-feedback/` | Criteria-based feedback view |
 
 ## 🤝 Contributing
 
-Feel free to customize and extend this app for your needs!
+This project is designed to be a lightweight, privacy-focused English coach. Feel free to fork and experiment with different prompts or voice models!
 
 ## 📝 License
 
-MIT License - feel free to use this project for learning and development.
-
----
-
-Built with ❤️ using Next.js and AI
+MIT License

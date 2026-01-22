@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { evaluateConversation } from '../../../../speakmate-ai/evaluator.js';
+import { evaluateConversation } from '@/lib/features/evaluation/evaluator';
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { evaluateConversation } from '@/lib/features/evaluation/evaluator';
+import { evaluateConversation } from '@/lib/services/evaluation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Call the isolated evaluator module
-    const evaluation = await evaluateConversation({ transcript });
+    const evaluation = await evaluateConversation(transcript);
 
     return NextResponse.json({
       success: true,

@@ -1,5 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import {
+  buildConversationContext,
+  determineConversationPhase,
+} from "@/lib/utils/conversationContext";
+import {
+  loadUserProfile,
+  saveUserProfile,
+  startNewSession,
+  incrementTurnCount,
+  updateCurrentTopic,
+  updateTopicPreference,
+  updateConversationPhase,
+  addTopicToSession,
+  incrementOffTopicAttempts,
+  addPersonalFact,
+  type UserProfile,
+} from "@/lib/utils/conversationMemory";
+import { isOffTopic } from "@/lib/utils/topicManager";
+import {
+  extractPersonalFacts,
+  isFactAlreadyStored,
+} from "@/lib/utils/factExtractor";
+import {
+  loadStreakData,
+  updateStreak,
+  saveStreakData,
+  getNewMilestone,
+  getMilestoneCelebration,
+} from "@/lib/utils/streakTracking";
+import {
+  shouldGenerateSummary,
+  generateSummary,
+  buildSummaryContext,
+} from "@/lib/utils/sessionSummary";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +51,10 @@ You never talk about practice, learning, exams, IELTS, scores, mistakes, grammar
 You simply have pleasant, human-like conversations.
 
 CORE BEHAVIOR:
-- Keep your replies VERY SHORT: 1–2 sentences maximum.
+- BE CONCISE, BUT HUMAN.
+- **General Rule**: 1 sentence + 1 question (max 20 words).
+- **EXCEPTION**: If the user asks YOU a question (e.g., "How are you?", "Do you like...?"), you MUST answer it warmly first (1 short sentence), THEN ask your follow-up.
+- SPEED IS KEY. Do not use empty filler words.
 - The user should speak 70% of the time, you only 30%.
 - Your main job is to LISTEN and ask questions that encourage LONG answers.
 - Never give long explanations or share too much about yourself.
@@ -38,13 +75,16 @@ QUESTION STRATEGY (CRITICAL):
   • "Did you...?" (yes/no)
 
 RESPONSE PATTERN:
-1. Brief acknowledgment (3-5 words): "Oh, that sounds interesting!" or "I see."
-2. ONE open-ended follow-up question that invites a story or detailed answer.
+1. **If responding to a statement**: Brief acknowledgment (3-5 words) + Open-ended follow-up.
+   - "That sounds amazing! What did you like most?"
+2. **If responding to a question**: Direct Answer (Short) + Transition/Follow-up.
+   - User: "How are you?"
+   - You: "I'm doing great, thanks for asking! How has your day been so far?"
 
 Example good responses:
 - "That sounds fun! What did you enjoy most about it?"
 - "Interesting! How did you get into that hobby?"
-- "Oh wow! Can you tell me more about what happened?"
+- "I'm wonderful, thanks! I'm curious, what's your favorite way to relax?"
 
 Example BAD responses (too long, closed questions):
 - "I love movies too! I enjoy action films and comedies. My favorite is probably The Matrix. Do you like action movies?" ❌
@@ -105,125 +145,20 @@ Make the user do most of the talking (70%). You are the curious listener who ask
 Every response should be SHORT and end with ONE open-ended question that invites a detailed answer.
 `.trim();
 
-function buildGreetingInstruction(opts: {
-  userName?: string | null;
-  isFirstEverHangout?: boolean;
-  lastHangoutAt?: string | null;
-  sameSession?: boolean;
-  hasAssistantMessages: boolean;
-}) {
-  const {
-    userName,
-    isFirstEverHangout,
-    lastHangoutAt,
-    sameSession,
-    hasAssistantMessages,
-  } = opts;
+const DUAL_PROCESS_INSTRUCTION = `
+CRITICAL: You are running a Dual-Process Architecture.
+1. NORMALIZE the user's latest input (fix grammar/fillers) to understand intent.
+2. REPLY to the normalized input acting as SpeakMate.
 
-  const safeName = userName && userName.trim().length > 0 ? userName.trim() : "friend";
-
-  // Simple time-gap categorization based on lastHangoutAt if provided.
-  // We only need rough categories, not exact accuracy.
-  let gapCategory: "first" | "same_session" | "same_day" | "days_ago" = "first";
-
-  if (hasAssistantMessages) {
-    // Not the first turn, do not force a greeting. Just continue the conversation.
-    return `
-This is NOT the first turn of the conversation. Continue naturally from previous context.
-Do not repeat introductions or greetings. Do not mention sessions or time gaps. Just respond as a warm, friendly companion.
-`.trim();
-  }
-
-  if (isFirstEverHangout) {
-    gapCategory = "first";
-  } else if (sameSession) {
-    gapCategory = "same_session";
-  } else if (lastHangoutAt) {
-    // Best-effort estimation; if lastHangoutAt is recent we treat as "same_day",
-    // otherwise "days_ago".
-    try {
-      const last = new Date(lastHangoutAt).getTime();
-      const now = Date.now();
-      const diffMs = now - last;
-      const diffHours = diffMs / (1000 * 60 * 60);
-      const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-      if (diffHours >= 0 && diffHours < 1) {
-        gapCategory = "same_session";
-      } else if (diffHours >= 1 && diffDays < 1.1) {
-        gapCategory = "same_day";
-      } else {
-        gapCategory = "days_ago";
-      }
-    } catch {
-      gapCategory = "days_ago";
-    }
-  } else {
-    // Returning user, but no timestamp: treat as "days_ago"
-    gapCategory = "days_ago";
-  }
-
-  // Generate behavior instructions per category
-  if (gapCategory === "first") {
-    return `
-This is the user's very first Hangout conversation with SpeakMate, or no previous session is known.
-Start with a warm, simple greeting that gently acknowledges meeting them for the first time.
-
-Guidelines:
-- Use the user's name once at the start if it is available: "${safeName}".
-- Example tone patterns:
-  - "Hi ${safeName}, it's really nice to meet you. How's your day going so far?"
-  - "Hey ${safeName}, I'm glad you're here. What have you been up to today?"
-- Keep it 2–3 short sentences and end with an easy question.
-`.trim();
-  }
-
-  if (gapCategory === "same_session") {
-    return `
-The user is returning in the same general session or very shortly after their last Hangout.
-Greet them as someone you already know and have just spoken with recently.
-
-Guidelines:
-- Use a light, friendly "you're back" feeling, but no guilt or pressure.
-- Use the user's name "${safeName}" once early in the message.
-- Example tone patterns:
-  - "Oh, you're back already, ${safeName} — I like that. What's on your mind now?"
-  - "Nice to hear from you again so soon, ${safeName}. How's everything going right this moment?"
-- Keep it 2–3 sentences and end with an open, gentle question.
-`.trim();
-  }
-
-  if (gapCategory === "same_day") {
-    return `
-The user has already talked to SpeakMate earlier today, but not in the same immediate session.
-Greet them like a friendly catch-up later in the same day.
-
-Guidelines:
-- Light continuity: "again today" feeling without any pressure.
-- Use the user's name "${safeName}" once at the start.
-- Example tone patterns:
-  - "Good to see you again today, ${safeName}. How has the rest of your day been since we last talked?"
-  - "Hi ${safeName}, nice to hear your voice again. Did anything interesting happen after we last spoke?"
-- Keep it 2–3 sentences and end with an open, gentle question.
-`.trim();
-  }
-
-  // days_ago
-  return `
-The user is returning after at least one full day away from Hangout.
-Greet them with a warm, relaxed "welcome back" feeling, without guilt or pressure.
-
-Guidelines:
-- Use the user's name "${safeName}" once.
-- Do not mention how long it has been in a heavy way; keep it light.
-- Example tone patterns:
-  - "Hi ${safeName}, it's really nice to talk with you again. How have things been lately?"
-  - "Hey ${safeName}, welcome back. What's been going on in your world these days?"
-- Keep it 2–3 sentences and end with an open, gentle question.
-`.trim();
+OUTPUT FORMAT (JSON):
+{
+  "normalized_input": "Clean version of user text",
+  "reply": "Your response (following the SpeakMate Persona)"
 }
+`;
 
 export async function POST(req: NextRequest) {
+
   try {
     const body = await req.json().catch(() => null);
 
@@ -238,6 +173,57 @@ export async function POST(req: NextRequest) {
       | { role: "system" | "user" | "assistant"; content: string }[]
       | undefined;
 
+    const metadata = (body.metadata ?? {}) as {
+      userName?: string;
+      userId?: string;
+      isNewSession?: boolean;
+      isInitialGreeting?: boolean;
+    };
+
+    // Handle initial greeting (AI speaks first)
+    if (metadata.isInitialGreeting && (!messages || messages.length === 0)) {
+      const userId = metadata.userId || "default";
+      let profile = loadUserProfile(userId);
+
+      if (metadata.userName && metadata.userName !== profile.userName) {
+        profile = { ...profile, userName: metadata.userName };
+      }
+
+      // Start new session
+      profile = startNewSession(profile);
+      const streakData = loadStreakData();
+      const updatedStreak = updateStreak(streakData);
+      saveStreakData(updatedStreak);
+
+      // Build greeting context using V3 Architecture greeting rules
+      const context = buildConversationContext(profile, false, updatedStreak);
+
+      // Generate greeting via LLM
+      const completion = await openai.chat.completions.create({
+        model: MODEL,
+        messages: [
+          { role: "system", content: `${SPEAKMATE_SYSTEM_PROMPT}\n\n${context.systemInstructions}` }
+        ],
+        max_tokens: 100,
+        temperature: 0.8,
+      });
+
+      const greeting = completion.choices[0]?.message?.content?.trim() || "Hi! How are you doing today?";
+
+      // Update profile
+      profile.currentSession.turnCount += 1;
+      saveUserProfile(profile);
+
+      return NextResponse.json({
+        reply: greeting,
+        metadata: {
+          currentTopic: context.suggestedTopic,
+          phase: "introduction",
+          streak: updatedStreak.currentStreak,
+        },
+      });
+    }
+
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
         { error: "Missing 'messages' array in request body." },
@@ -245,25 +231,95 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const metadata = (body.metadata ?? {}) as {
-      userName?: string;
-      isFirstEverHangout?: boolean;
-      lastHangoutAt?: string | null;
-      sameSession?: boolean;
-    };
+    // Load or create user profile
+    const userId = metadata.userId || "default";
+    let profile = loadUserProfile(userId);
 
-    const hasAssistantMessages = messages.some(
-      (m) => m.role === "assistant"
-    );
+    // Update user name if provided
+    if (metadata.userName && metadata.userName !== profile.userName) {
+      profile = { ...profile, userName: metadata.userName };
+    }
 
-    const greetingInstruction = buildGreetingInstruction({
-      userName: metadata.userName,
-      isFirstEverHangout: metadata.isFirstEverHangout,
-      lastHangoutAt: metadata.lastHangoutAt,
-      sameSession: metadata.sameSession,
-      hasAssistantMessages,
-    });
+    // Start new session if indicated
+    if (metadata.isNewSession && profile.currentSession.turnCount > 0) {
+      profile = startNewSession(profile);
 
+      // Update streak when starting new session
+      const oldStreak = loadStreakData();
+      const newStreak = updateStreak(oldStreak);
+      saveStreakData(newStreak);
+
+      // Check for milestone achievement
+      const milestone = getNewMilestone(oldStreak, newStreak);
+      if (milestone) {
+        console.log(`[Conversation] Milestone achieved: ${milestone} days!`);
+        // Store milestone for potential celebration in UI
+        if (typeof window !== "undefined") {
+          window.sessionStorage.setItem(
+            "speakmate_milestone",
+            JSON.stringify({ milestone, message: getMilestoneCelebration(milestone) })
+          );
+        }
+      }
+    }
+
+    // Load streak data for context building
+    const updatedStreak = updateStreak(loadStreakData()); // Use updateStreak instead of just load
+
+    // --- STT Normalization & Reply (Merged Step for Latency) ---
+    // We strictly use normalizedMessages for CONTEXT calculation only?
+    // Actually, since we merged the calls, we don't have normalized text YET.
+    // We will let the LLM normalize internally.
+    const normalizedMessages = [...messages];
+    // Note: In this optimized flow, context is built on RAW input, but LLM fixes it on the fly.
+
+    // Check if this is first turn (no assistant messages yet)
+    const hasAssistantMessages = messages.some((m) => m.role === "assistant");
+
+    // Build conversation context using NORMALIZED messages and UPDATED streak
+    // We use normalizedMessages here so the AI understands the user's intent clearly,
+    // even if the raw input had grammar errors.
+    const context = buildConversationContext(profile, hasAssistantMessages, updatedStreak);
+
+    // Get last user message for analysis
+    const lastUserMessage = messages
+      .filter((m) => m.role === "user")
+      .slice(-1)[0]?.content || "";
+
+    // Detect off-topic attempts
+    const userIsOffTopic = isOffTopic(lastUserMessage);
+    if (userIsOffTopic) {
+      profile = incrementOffTopicAttempts(profile);
+    }
+
+    // Update conversation phase
+    const newPhase = determineConversationPhase(profile);
+    if (newPhase !== profile.currentSession.currentPhase) {
+      profile = updateConversationPhase(profile, newPhase);
+    }
+
+    // Update current topic if suggested
+    if (context.suggestedTopic) {
+      profile = updateCurrentTopic(profile, context.suggestedTopic);
+      profile = addTopicToSession(profile, context.suggestedTopic);
+    }
+
+    // --- V.2 Feature C: Anti-Stall Steering ---
+    // Detect short answers and switch AI to "Probing Mode"
+    const wordCount = lastUserMessage.trim().split(/\s+/).length;
+    const isShortAnswer = wordCount < 3 && lastUserMessage.length > 0;
+    const antiStallInstruction = isShortAnswer
+      ? "\n\n[PROBING MODE]: The user gave a very short answer. Ask an open-ended follow-up question to encourage them to elaborate. Use questions like 'What made you feel that way?' or 'Can you tell me more about that?'"
+      : "";
+
+    // --- V.2 Feature D: Session Context ("Goldfish Fix") ---
+    // Generate summary every 5 turns to maintain context
+    if (shouldGenerateSummary(profile.currentSession.turnCount)) {
+      await generateSummary(messages as { role: string; content: string }[], userId);
+    }
+    const summaryContext = buildSummaryContext(userId);
+
+    // Prepare chat messages
     const chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       {
         role: "system",
@@ -271,9 +327,9 @@ export async function POST(req: NextRequest) {
       },
       {
         role: "system",
-        content: greetingInstruction,
+        content: context.systemInstructions + antiStallInstruction + summaryContext + "\n\n" + DUAL_PROCESS_INSTRUCTION,
       },
-      ...messages,
+      ...normalizedMessages, // (Raw is passed, LLM normalizes internally)
     ];
 
     const completion = await openai.chat.completions.create({
@@ -281,15 +337,91 @@ export async function POST(req: NextRequest) {
       messages: chatMessages,
       temperature: 0.8,
       max_tokens: 150,
+      response_format: { type: "json_object" }, // Critical for Dual Process
     });
 
-    const reply = completion.choices[0]?.message?.content ?? "";
+    let reply = "";
+    try {
+      const rawJson = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(rawJson);
+      reply = result.reply || "";
+      if (result.normalized_input) {
+        console.log(`[Dual-Process] Normalized: "${result.normalized_input}"`);
+      }
+    } catch (e) {
+      console.error("Failed to parse Dual-Process JSON:", e);
+      // Fallback: try to use raw content if it's not JSON
+      reply = completion.choices[0]?.message?.content ?? "";
+    }
 
-    return NextResponse.json({ reply }, { status: 200 });
-  } catch (error) {
-    console.error("[/api/hangout/conversation] error:", error);
+    // Update engagement score based on user response length
+    if (lastUserMessage && context.suggestedTopic) {
+      profile = updateTopicPreference(
+        profile,
+        context.suggestedTopic,
+        lastUserMessage.length
+      );
+
+      // Extract personal facts from user message
+      const extractedFacts = extractPersonalFacts(
+        lastUserMessage,
+        context.suggestedTopic
+      );
+
+      // Add new facts to profile (avoiding duplicates)
+      const existingFacts = profile.conversationMemory.personalFacts.map(
+        (f) => f.fact
+      );
+
+      for (const extracted of extractedFacts) {
+        if (!isFactAlreadyStored(extracted.fact, existingFacts)) {
+          profile = addPersonalFact(
+            profile,
+            extracted.fact,
+            extracted.topic
+          );
+          console.log(`[Conversation] Extracted fact: ${extracted.fact}`);
+        }
+      }
+    }
+
+    // Increment turn count
+    profile = incrementTurnCount(profile);
+
+    // Save updated profile
+    saveUserProfile(profile);
+
+    // Use already loaded streak data for response metadata
+    // const streakData = loadStreakData(); // Already loaded above
+
+    // Return response with profile metadata
     return NextResponse.json(
-      { error: "Chat API error." },
+      {
+        reply,
+        metadata: {
+          currentTopic: profile.currentSession.currentTopic,
+          phase: profile.currentSession.currentPhase,
+          turnCount: profile.currentSession.turnCount,
+          streak: updatedStreak.currentStreak,
+          totalFacts: profile.conversationMemory.personalFacts.length,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("[/api/hangout/conversation] FATAL ERROR:", error);
+
+    // Check for common issues
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("CRITICAL: OPENAI_API_KEY is missing in environment variables.");
+    }
+
+    if (error.response) {
+      console.error("OpenAI API Response Error:", error.response.status, error.response.data);
+    }
+
+    return NextResponse.json(
+      { error: "Chat API error.", details: error.message },
       { status: 500 }
     );
   }
