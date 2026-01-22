@@ -10,19 +10,56 @@ const GREETING_TEMPLATES = {
         "Hello {{name}}! I'm SpeakMate. Good to see you."
     ],
     returnShow: { // "Show" -> Just now (< 3 hours)
-        morning: ["Welcome back {{name}}. Picking up where we left off?"],
-        afternoon: ["Welcome back {{name}}. Good to see you again."],
-        evening: ["Welcome back {{name}}. Ready to chat?"]
+        morning: [
+            "Welcome back {{name}}. Picking up where we left off?",
+            "Hey {{name}}. Ready to keep going?",
+            "Hi again {{name}}. What's on your mind now?",
+            "Back so soon {{name}}? I'm ready if you are!"
+        ],
+        afternoon: [
+            "Welcome back {{name}}. Good to see you again.",
+            "Hey {{name}}. Ready to keep going?",
+            "Hi again {{name}}. How's your afternoon going?"
+        ],
+        evening: [
+            "Welcome back {{name}}. Ready to chat?",
+            "Hey {{name}}. Ready to keep going?",
+            "Hi again {{name}}. Good to have you back."
+        ]
     },
     returnDay: { // "Day" -> Same day but later (> 3 hours)
-        morning: ["Good morning {{name}}. How's your day starting?"],
-        afternoon: ["Hey {{name}}. How's your day going?"],
-        evening: ["Good evening {{name}}. How's your day been?"]
+        morning: [
+            "Good morning {{name}}. How's your day starting?",
+            "Hey {{name}}. How's your morning been?",
+            "Welcome back {{name}}. Ready to start the day?"
+        ],
+        afternoon: [
+            "Hey {{name}}. How's your day going?",
+            "Hi {{name}}. How's your afternoon treating you?",
+            "Welcome back {{name}}. How's your day been so far?"
+        ],
+        evening: [
+            "Good evening {{name}}. How's your day been?",
+            "Hey {{name}}. How was your day?",
+            "Hi {{name}}. Relaxing evening?"
+        ]
     },
     returnLong: { // "Long" -> > 24 hours
-        morning: ["Hey {{name}}. Long time no see. How have you been?"],
-        afternoon: ["Hey {{name}}. Nice to see you back. How's it going?"],
-        evening: ["Hey {{name}}. Long time no see. How are things?"]
+        morning: [
+            "Hey {{name}}. Long time no see. How have you been?",
+            "Welcome back {{name}}! It's been a while.",
+            "Hey {{name}}. Good to see you again!"
+        ],
+        afternoon: [
+            "Hey {{name}}. Nice to see you back. How's it going?",
+            "Welcome back {{name}}! Long time no see.",
+            "Hey {{name}}. Good to have you here again."
+        ],
+        evening: [
+            "Hey {{name}}. Long time no see. How are things?",
+            "Welcome back {{name}}! How've you been keeping?",
+            "Hey {{name}}. Good to see you back."
+        ]
     }
 };
 

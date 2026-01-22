@@ -87,16 +87,24 @@ export function HangoutUI({
                     <div className="w-full flex flex-col justify-end items-center mb-6 h-[300px] overflow-hidden mask-linear-gradient">
                         <AnimatePresence initial={false}>
                             {displayStack.map((msg, index) => {
-                                // Determine opacity based on position (index 0 is oldest/top in this sliced array? No, wait.)
-                                // displayStack is [oldest, ..., newest]
-                                // We want Newest at BOTTOM.
-                                // So index === displayStack.length - 1 is the Newest.
+                                // Smart Key Logic: Unify Interim & Final identity to prevent flashing
+                                // Interim is always the "next" index (messages.length)
+                                // Finalized message at the end is ALSO that index.
+                                const getStableKey = (m: any) => {
+                                    if (m.id === 'interim') return `turn-${messages.length}`;
+                                    const globalIndex = messages.indexOf(m);
+                                    return globalIndex !== -1 ? `turn-${globalIndex}` : `fallback-${index}`;
+                                };
+
+                                const stableKey = getStableKey(msg);
+
+                                // Visual Logic
                                 const isNewest = index === displayStack.length - 1;
                                 const isOldest = index === 0 && displayStack.length > 1;
 
                                 return (
                                     <motion.div
-                                        key={msg.id || index}
+                                        key={stableKey}
                                         layout
                                         initial={{ opacity: 0, y: 50, scale: 0.8 }}
                                         animate={{
