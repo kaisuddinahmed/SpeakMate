@@ -6,23 +6,23 @@ export type GreetingContext = {
 
 const GREETING_TEMPLATES = {
     firstTime: [
-        "Hi {{name}}. I'm SpeakMate. Ready to start?",
-        "Hello {{name}}! I'm SpeakMate. Excited to chat with you today."
+        "Hi {{name}}. I'm SpeakMate. Nice to meet you.",
+        "Hello {{name}}! I'm SpeakMate. Good to see you."
     ],
     returnShow: { // "Show" -> Just now (< 3 hours)
-        morning: ["Welcome back {{name}}! Ready to keep going?"],
-        afternoon: ["Welcome back {{name}}! Hope your afternoon is going well."],
-        evening: ["Welcome back {{name}}! Good to see you again."]
+        morning: ["Welcome back {{name}}. Picking up where we left off?"],
+        afternoon: ["Welcome back {{name}}. Good to see you again."],
+        evening: ["Welcome back {{name}}. Ready to chat?"]
     },
     returnDay: { // "Day" -> Same day but later (> 3 hours)
-        morning: ["Good morning {{name}}! Ready for a fresh session?"],
-        afternoon: ["Good afternoon {{name}}! Great to see you back."],
-        evening: ["Good evening {{name}}! Perfect time for a chat."]
+        morning: ["Good morning {{name}}. How's your day starting?"],
+        afternoon: ["Hey {{name}}. How's your day going?"],
+        evening: ["Good evening {{name}}. How's your day been?"]
     },
     returnLong: { // "Long" -> > 24 hours
-        morning: ["Long time no see, {{name}}! Good morning."],
-        afternoon: ["Long time no see, {{name}}! Hope you've been well."],
-        evening: ["Long time no see, {{name}}! Ready to jump back in?"]
+        morning: ["Hey {{name}}. Long time no see. How have you been?"],
+        afternoon: ["Hey {{name}}. Nice to see you back. How's it going?"],
+        evening: ["Hey {{name}}. Long time no see. How are things?"]
     }
 };
 

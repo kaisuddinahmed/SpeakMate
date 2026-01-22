@@ -208,7 +208,43 @@ Then:
 
 ---
 
+---
+
+## Introduction Arc ("The Coffee Shop Flow")
+
+For **First-Time Users Only**, the system enforces a strict 4-turn "getting to know you" arc before entering the standard topic loop.
+
+**Goal**: Mimic meeting a new person in a casual setting.
+
+| Turn | Intent | Script / Prompt Logic |
+|------|--------|-----------------------|
+| **1** | **Vibe Check** | "Hi [Name]. I'm SpeakMate. Nice to meet you. How's your day going?" |
+| **2** | **Location** | User response -> "Nice. So where are you joining from today?" |
+| **3** | **Occupation** | User response -> "Ah, [City]! Do you work there or are you studying?" |
+| **4** | **Pivot** | User response -> Bridge -> **Transition to Hobbies** (Part 1 Topic). |
+
+> **Note**: This overrides the standard "Topic Selection" logic for the first 4 turns of a new user's life cycle.
+
+---
+
 ## Final Note
 
-If greetings ever feel noticeable, the system has failed.  
+If greetings ever feel noticeable, the system has failed.
 The best greeting is the one the user doesn’t think about.
+
+---
+
+## Randomized Variations (Anti-Repetition Layer)
+
+To prevent robotic repetition (especially for frequent users), the system **MUST** randomise the exact phrasing within each time-gap category.
+
+**Logic**:
+- Determine the time gap (e.g., `< 3 hours`).
+- Select the category (e.g., `JUST_NOW`).
+- Randomly pull 1 string from a pool of 3-4 variations.
+
+**Example Pools**:
+*   **< 3 Hours**: "Picking up where we left off?", "Ready to keep going?", "Back so soon?"
+*   **Next Day**: "How was your day?", "Ready to practice?", "How's everything going?"
+
+This ensures that even if a user logs in 20 times a day, they won't hear the exact same phrase 20 times.

@@ -40,13 +40,58 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
         messagesRef.current = messages;
     }, [messages]);
 
-    // --- 1.5 Smart Turn Detection ---
+    // --- 1.5 Smart Turn Detection (Semantic Architecture) ---
     const isCompleteThought = (text: string) => {
         const t = text.trim();
-        if (t.length < 5) return false;
+        if (!t) return false;
+
         const lower = t.toLowerCase().replace(/[.,!?]$/, '');
-        const connectors = ['and', 'but', 'so', 'or', 'because', 'then', 'well', 'however'];
-        if (connectors.some(c => lower.endsWith(' ' + c) || lower === c)) return false;
+        const words = lower.split(/\s+/);
+
+        // 1. Whitelist (Short Utterances <= 3 words)
+        // Expanded list to cover common conversational shorts
+        const allowList = [
+            'yes', 'no', 'yep', 'nope', 'nah',
+            'ok', 'okay', 'sure', 'alright', 'right', 'correct', 'fine', 'true', 'exactly', 'absolutely',
+            'wow', 'cool', 'nice', 'great', 'awesome', 'really',
+            'wait', 'why', 'who', 'how', 'what', 'when',
+            'maybe', 'perhaps', 'please', 'thanks', 'thank you'
+        ];
+
+        if (words.length <= 3 && allowList.some(w => lower.includes(w))) {
+            return true;
+        }
+
+        // 2. Semantic Completion Check (Block Incomplete Structures)
+
+        // Regex Patterns
+        const patterns = [
+            // Ends with Prepositions (to, with, for, about...)
+            /\b(to|with|for|about|from|of|in|on|at|by|into|onto)$/,
+
+            // Ends with Connectors & Relative Pronouns (and, but, so, because...)
+            // ADDED: where, which, who, that, whose, whom
+            /\b(and|or|but|so|because|then|if|when|while|where|which|who|that|whose|whom)$/,
+
+            // Ends with Starters (I think, I feel...)
+            /\b(i think|i feel|i believe|i like to|i usually|i am|i was|it is|it's|its|there is|there are)$/,
+
+            // Ends with Transitive Verbs (listen, watch, go, make...)
+            // Note: Removed 'do' as it often ends valid sentences ("What should I do", "Yes I do")
+            /\b(listen|watch|go|make|take|get|have|want|need|like|love|hate|enjoy)$/
+        ];
+
+        // Specific Exceptions for "I think so", "Let's go", "I do"
+        if (lower.endsWith('i think so') || lower.endsWith("let's go") || lower.endsWith('i do')) {
+            return true;
+        }
+
+        // Check if matches any blocking pattern
+        if (patterns.some(p => p.test(lower))) {
+            console.log(`[TurnManager] Blocking incomplete thought: "${t}"`);
+            return false;
+        }
+
         return true;
     };
 
@@ -219,9 +264,8 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
         // Only accept speech requests if not already speaking (unless logic overrides)
         // But Controller handles logic. We just obey.
 
-        // 1. Add to UI
-        // Delay slightly if you want to sync, but usually prompt latency is enough.
-        setMessages(prev => [...prev, { role: 'assistant', content: text, timestamp: Date.now() }]);
+        // 1. Add to UI (DELAYED until audio ready - see below)
+        // setMessages(prev => [...prev, { role: 'assistant', content: text, timestamp: Date.now() }]);
 
         try {
             transition('SPEAKING');
@@ -246,6 +290,9 @@ export function useAudioTurnManager({ onUserTurn }: AudioTurnManagerProps) {
                 console.log('🛑 Aborting TTS play: User barged in during synthesis.');
                 return;
             }
+
+            // Sync Visuals with Audio: Add message to UI only when audio is ready to play
+            setMessages(prev => [...prev, { role: 'assistant', content: text, timestamp: Date.now() }]);
 
             audioRef.current = audio;
             audio.onended = () => {

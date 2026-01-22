@@ -107,28 +107,44 @@ Objective Metrics from Student's Speech:
 === EVALUATION CRITERIA (Band 0-9, 0.5 increments) ===
 
 1. FLUENCY & COHERENCE
-9: Smooth, natural flow; pauses only for complex idea planning.
-7: Speaks at length; some pauses, ideas generally connected.
-5: Uses repetition or slow pacing; coherence uneven.
+9: Smooth, natural flow; fully coherent; pauses only for complex idea planning.
+8: Smooth and well-paced; occasional hesitation but ideas well-organized.
+7: Speaks at length; some pauses, but ideas generally clear and connected.
+6: Speaks at length but rhythm varies; linkers inconsistent; some loss of flow.
+5: Continues speaking but uses repetition or slow pacing; coherence uneven.
+4: Frequent breaks, short turns, basic linking; coherence weak.
 3: Long pauses; difficulty producing more than simple statements.
+2: Mostly isolated words or fragments.
 
 2. VOCABULARY
 9: Very wide, precise word choice; conveys subtle meaning.
+8: Broad, flexible vocabulary; minor errors.
 7: Good everyday vocabulary; occasional errors but meaning clear.
-5: Relies on general words; rephrasing may fail.
-3: Very restricted vocabulary for basic info only.
+6: Enough vocabulary for familiar & abstract topics; simplification noticeable.
+5: Discusses familiar topics but relies on general words; rephrasing may fail.
+4: Limited range; frequent word-choice errors.
+3: Very restricted vocabulary for basic personal info only.
+2: Tiny set of basic words or memorized phrases.
 
 3. GRAMMAR
 9: Complex structures with natural control; rare slips.
-7: Mix of simple/complex; errors present but meaning clear.
-5: Simple sentences mostly accurate; complex ones inaccurate.
+8: Frequent accurate complex forms; few errors.
+7: Mix of simple/complex structures; errors present but meaning clear.
+6: Simple structures controlled; complex forms attempted with noticeable errors.
+5: Simple sentences mostly accurate; complex ones often inaccurate.
+4: Mostly simple and repetitive; many errors beyond basics.
 3: Frequent errors even in simple structures.
+2: Almost no sentence structure; mostly fragments.
 
-4. PRONUNCIATION (Infer from transcript clarity)
-9: Clear, highly intelligible.
-7: Mostly clear; rarely impedes understanding.
-5: Understandable but with frequent errors.
-3: Many words hard to recognize.
+4. PRONUNCIATION (Infer from transcript text & phonetic patterns)
+9: Clear, natural, highly intelligible; excellent stress/intonation control.
+8: Highly intelligible; strong control of rhythm and stress.
+7: Mostly clear; some problematic sounds but rarely impede understanding.
+6: Understandable with little effort; some sound or stress problems.
+5: Understandable but with frequent sound/stress errors.
+4: Pronunciation issues cause loss of clarity at times.
+3: Many words hard to recognize; communication difficult.
+2: Mostly unintelligible sounds.
 
 === SCORING RULES ===
 1. Score each criterion independently (0-9, 0.5 increments).

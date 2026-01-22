@@ -96,27 +96,33 @@ function DetailedFeedbackContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Mobile Container */}
-      <div className="w-full max-w-md mx-auto min-h-screen flex flex-col">
-        {/* Header - Centered */}
-        <header className="flex items-center justify-center px-4 py-4 relative">
+    <div className="min-h-screen bg-white flex justify-center font-sans overflow-x-hidden">
+      <div className="w-full max-w-[430px] h-[100dvh] relative overflow-hidden shadow-2xl bg-white flex flex-col">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/assets/Home%20Background.svg"
+            alt="Home Background"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Header - Transparent Glass */}
+        <div className="relative z-20 flex items-center justify-between px-6 py-6 pt-12">
           <button
             onClick={handleBack}
-            className="absolute left-4 text-gray-600 hover:text-gray-800"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-gray-700 shadow-sm hover:scale-105 transition-transform"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-lg font-semibold text-gray-800">Detailed Feedback</h1>
-        </header>
-
-        {/* Separator after header */}
-        <div className="h-px bg-gray-200 mx-4"></div>
+          <h1 className="text-xl font-bold text-gray-800 drop-shadow-sm">Detailed Feedback</h1>
+          <div className="w-10"></div>
+        </div>
 
         {/* Content */}
-        <main className="flex-1 px-4 py-5 space-y-4 overflow-auto pb-28">
+        <main className="relative z-10 flex-1 px-5 py-6 space-y-6 overflow-y-auto scrollbar-hide pb-32">
           {/* See Full Transcript Button - Blue to Purple Gradient */}
           <button
             onClick={handleTranscript}
@@ -128,52 +134,52 @@ function DetailedFeedbackContent() {
             See Full Transcript with Corrections
           </button>
 
-          {/* What You Did Well - Green fill with green border */}
-          <section className="bg-green-50 rounded-2xl p-5 border-2 border-green-200">
+          {/* What You Did Well - Green Tinted Glass */}
+          <section className="bg-green-500/10 backdrop-blur-md rounded-3xl p-6 border border-green-200/50 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-base font-semibold text-gray-800">What You Did Well</h2>
+              <h2 className="text-lg font-bold text-gray-800">What You Did Well</h2>
             </div>
-            <ul className="space-y-3">
-              {getPoints(displayFeedback.whatYouDidWell, "text-green-600")}
+            <ul className="space-y-4">
+              {getPoints(displayFeedback.whatYouDidWell, "text-green-700")}
             </ul>
           </section>
 
-          {/* What to Improve Next - Blue fill with blue border */}
-          <section className="bg-blue-50 rounded-2xl p-5 border-2 border-blue-200">
+          {/* What to Improve Next - Blue Tinted Glass */}
+          <section className="bg-blue-500/10 backdrop-blur-md rounded-3xl p-6 border border-blue-200/50 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </div>
-              <h2 className="text-base font-semibold text-gray-800">What to Improve Next</h2>
+              <h2 className="text-lg font-bold text-gray-800">What to Improve Next</h2>
             </div>
-            <ul className="space-y-3">
-              {getPoints(displayFeedback.whatToImproveNext, "text-blue-600")}
+            <ul className="space-y-4">
+              {getPoints(displayFeedback.whatToImproveNext, "text-blue-700")}
             </ul>
           </section>
 
-          {/* Frequent Error Patterns - Red/Orange */}
+          {/* Frequent Error Patterns - Red Tinted Glass */}
           {displayFeedback.errorPatterns && displayFeedback.errorPatterns.length > 0 && (
-            <section className="bg-red-50 rounded-2xl p-5 border-2 border-red-200">
+            <section className="bg-red-500/10 backdrop-blur-md rounded-3xl p-6 border border-red-200/50 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-600">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
-                <h2 className="text-base font-semibold text-gray-800">Recurring Errors</h2>
+                <h2 className="text-lg font-bold text-gray-800">Recurring Errors</h2>
               </div>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {displayFeedback.errorPatterns.map((pattern, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
+                  <li key={idx} className="flex items-start gap-3">
                     <span className="w-2 h-2 mt-2 rounded-full bg-red-500 shrink-0"></span>
-                    <span className="text-sm leading-relaxed text-red-700 font-medium">
+                    <span className="text-sm leading-relaxed text-red-800 font-medium">
                       {pattern}
                     </span>
                   </li>
@@ -182,39 +188,34 @@ function DetailedFeedbackContent() {
             </section>
           )}
 
-          {/* Recommended Practice - Purple fill with purple border, deep purple icon */}
-          <section className="bg-purple-50 rounded-2xl p-5 border-2 border-purple-200">
+          {/* Recommended Practice - Purple Tinted Glass */}
+          <section className="bg-purple-500/10 backdrop-blur-md rounded-3xl p-6 border border-purple-200/50 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-600">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2L13.09 8.26L19 7L14.74 11.26L21 12L14.74 12.74L19 17L13.09 15.74L12 22L10.91 15.74L5 17L9.26 12.74L3 12L9.26 11.26L5 7L10.91 8.26L12 2Z" />
                 </svg>
               </div>
-              <h2 className="text-base font-semibold text-gray-800">Recommended Practice</h2>
+              <h2 className="text-lg font-bold text-gray-800">Recommended Practice</h2>
             </div>
-            {/* White text area inside purple card */}
-            <div className="bg-white rounded-xl p-4 border border-purple-100">
-              <p className="text-gray-700 text-sm leading-relaxed">
+            {/* White/Glass text area inside purple card */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-5 border border-purple-100/50">
+              <p className="text-gray-800 text-sm leading-relaxed font-medium">
                 {displayFeedback.recommendedPractice}
               </p>
             </div>
           </section>
         </main>
 
-        {/* Fixed Bottom Button with Separator */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white">
-          <div className="max-w-md mx-auto">
-            {/* Separator line */}
-            <div className="h-px bg-gray-200 mx-4"></div>
-            {/* Button */}
-            <div className="p-4">
-              <button
-                onClick={handleBack}
-                className="w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white py-4 rounded-2xl font-semibold shadow-lg"
-              >
-                Back
-              </button>
-            </div>
+        {/* Fixed Bottom Button with Transparent Glass */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-t border-white/30 z-50">
+          <div className="w-full max-w-[430px] mx-auto p-4">
+            <button
+              onClick={handleBack}
+              className="w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]"
+            >
+              Back
+            </button>
           </div>
         </div>
       </div>

@@ -169,23 +169,33 @@ function SummaryContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="w-full max-w-[430px] mx-auto bg-white dark:bg-gray-800 min-h-screen flex flex-col">
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <button onClick={goToDashboard} className="text-gray-600 dark:text-gray-300">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <h1 className="text-lg font-semibold text-gray-800 dark:text-white">Session Summary</h1>
-            <div className="w-6"></div>
-          </div>
+    <div className="min-h-screen bg-white flex justify-center font-sans overflow-x-hidden">
+      <div className="w-full max-w-[430px] h-[100dvh] relative overflow-hidden shadow-2xl bg-white flex flex-col">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/assets/Home%20Background.svg"
+            alt="Home Background"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Header - Transparent Glass */}
+        <div className="relative z-20 flex items-center justify-between px-6 py-6 pt-12">
+          <button
+            onClick={goToDashboard}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-gray-700 shadow-sm hover:scale-105 transition-transform"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-bold text-gray-800 drop-shadow-sm">Session Summary</h1>
+          <div className="w-10"></div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        <div className="relative z-10 flex-1 overflow-y-auto px-5 pb-8 space-y-6 scrollbar-hide">
           {isEvaluating ? (
             /* Loading State */
             <div className="flex flex-col items-center justify-center py-20">
@@ -218,20 +228,36 @@ function SummaryContent() {
                 </div>
               )}
 
-              {/* Session Stats */}
-              <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-600 dark:to-gray-500 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm text-gray-600 dark:text-gray-300">
-                      <span className="font-semibold">{summary.duration}</span> • <span className="font-semibold">{summary.messageCount}</span> messages
-                    </div>
+              {/* Session Stats - Liquid Glass */}
+              <div className="liquid-glass rounded-3xl p-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Duration</div>
+                    <div className="text-lg font-bold text-gray-800">{summary.duration}</div>
+                  </div>
+                </div>
+                <div className="h-8 w-px bg-gray-300/50"></div>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <div className="text-xs font-medium text-gray-500 uppercase tracking-wide text-right">Messages</div>
+                    <div className="text-lg font-bold text-gray-800 text-right">{summary.messageCount}</div>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
                   </div>
                 </div>
               </div>
 
               {/* Overall Score + Performance Grid */}
               {summary.messageCount > 0 && (
-                <div className="bg-gradient-to-r from-green-100 to-blue-100 dark:from-gray-600 dark:to-gray-500 rounded-2xl p-6 shadow-lg border-2 border-green-200 dark:border-gray-500">
+                <div className="liquid-glass rounded-3xl p-6 shadow-xl border border-white/60">
                   {/* Overall Score */}
                   <div className="text-center mb-6">
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Session Score</p>
@@ -247,9 +273,9 @@ function SummaryContent() {
                   </div>
 
                   {/* 2x2 Score Grid */}
-                  <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="grid grid-cols-2 gap-4 mt-8">
                     {/* Fluency */}
-                    <div className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                    <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 text-center border border-white/50 shadow-sm">
                       <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-2">
                         <svg className="w-20 h-20 transform -rotate-90">
                           <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-200 dark:text-gray-600" />
@@ -272,7 +298,7 @@ function SummaryContent() {
                     </div>
 
                     {/* Vocabulary */}
-                    <div className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                    <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 text-center border border-white/50 shadow-sm">
                       <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-2">
                         <svg className="w-20 h-20 transform -rotate-90">
                           <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-200 dark:text-gray-600" />
@@ -295,7 +321,7 @@ function SummaryContent() {
                     </div>
 
                     {/* Grammar */}
-                    <div className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                    <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 text-center border border-white/50 shadow-sm">
                       <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-2">
                         <svg className="w-20 h-20 transform -rotate-90">
                           <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-200 dark:text-gray-600" />
@@ -318,7 +344,7 @@ function SummaryContent() {
                     </div>
 
                     {/* Pronunciation */}
-                    <div className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
+                    <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 text-center border border-white/50 shadow-sm">
                       <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-2">
                         <svg className="w-20 h-20 transform -rotate-90">
                           <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-200 dark:text-gray-600" />
@@ -345,8 +371,16 @@ function SummaryContent() {
 
               {/* Feedback with Detail Button */}
               {summary.messageCount > 0 && briefFeedback && (
-                <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-gray-700 dark:to-gray-600 rounded-2xl p-6 border-2 border-yellow-200 dark:border-gray-500">
-                  <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed mb-4">
+                <div className="liquid-glass rounded-3xl p-6 border border-white/60">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <h3 className="font-bold text-gray-800">Quick Feedback</h3>
+                  </div>
+                  <p className="text-gray-700 leading-relaxed mb-5">
                     {briefFeedback}
                   </p>
                   <button

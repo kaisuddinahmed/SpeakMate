@@ -331,21 +331,31 @@ function buildPhaseGuidance(
     case "introduction":
       if (turnCount === 1) {
         return `
-INTRODUCTION PHASE (Turn 2):
-The user just told you their name. Now ask: "Where are you from?"
-Keep it simple and friendly.
+INTRODUCTION PHASE (Turn 2 - Location):
+The user just greeted you ("Nice to meet you").
+Your Goal: Find out where they are.
+Action: Ask naturally: "So, where are you joining from today?"
 `.trim();
       } else if (turnCount === 2) {
         return `
-INTRODUCTION PHASE (Turn 3):
-The user shared where they're from. Now ask about work or study:
-"What do you do—are you working or studying?"
+INTRODUCTION PHASE (Turn 3 - Occupation):
+The user shared their location.
+Your Goal: Contextualize their life.
+Action: React to the location ("Ah, I've heard it's lovely there") and ask: "What keeps you busy there—do you work or are you studying?"
+`.trim();
+      } else if (turnCount === 3) {
+        return `
+INTRODUCTION PHASE (Turn 4 - Transition to Interests):
+The user shared their occupation.
+Your Goal: Smoothly pivot to Hobbies (Part 1 Topic).
+Action: Acknowledge their work/study ("That sounds intense/interesting!"), then bridge: "By the way, when you're not busy with that, what do you usually do for fun?"
 `.trim();
       } else {
         return `
-INTRODUCTION PHASE (Turn ${turnCount + 1}):
-Continue with personal background questions before moving to other topics.
-Ask about their work, studies, or daily life.
+INTRODUCTION COMPLETE:
+You know their Name, Location, and Job.
+Now you are discussing their Hobbies/Interests.
+Continue naturally from here, diving deeper into their hobbies.
 `.trim();
       }
 

@@ -252,40 +252,86 @@ export function getDynamicGreeting(
   const hoursGap = lastPractice ? (now - lastPractice) / (1000 * 60 * 60) : Infinity;
 
   // Time-gap based greetings (V3 Architecture Spec)
+  // We use random selection to avoid repetition (User Request)
+
+  const getRandom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+
   if (hoursGap > 168) { // > 7 days
     return nickname
-      ? `Hey ${nickname}! It's been a while, so good to hear your voice again! How have you been?`
-      : "Hey! It's been a while, so good to hear your voice again! How have you been?";
+      ? getRandom([
+        `Hey ${nickname}! It's been a while, so good to hear your voice again! How have you been?`,
+        `Welcome back ${nickname}! Long time no see. How have things been?`,
+        `Hey ${nickname}! I've missed our chats. How have you been keeping?`
+      ])
+      : getRandom([
+        "Hey! It's been a while, so good to hear your voice again! How have you been?",
+        "Welcome back! Long time no see. How have things been?",
+        "Hey! I've missed our chats. How have you been keeping?"
+      ]);
   }
 
   if (hoursGap > 48) { // 2-6 days
     return nickname
-      ? `Hey ${nickname}! Nice to see you back. How has your week been going?`
-      : "Hey! Nice to see you back. How has your week been going?";
+      ? getRandom([
+        `Hey ${nickname}! Nice to see you back. How has your week been going?`,
+        `Hi ${nickname}! Good to have you here again. How's your week been?`,
+        `Hey ${nickname}. Hope you're having a good week. What's new?`
+      ])
+      : getRandom([
+        "Hey! Nice to see you back. How has your week been going?",
+        "Hi! Good to have you here again. How's your week been?",
+        "Hey. Hope you're having a good week. What's new?"
+      ]);
   }
 
   if (hoursGap > 12) { // 12-48 hrs (Next Day)
     return nickname
-      ? `Hi ${nickname}! Ready for our daily chat? How was your day?`
-      : "Hi! Ready for our daily chat? How was your day?";
+      ? getRandom([
+        `Hi ${nickname}. Good to see you. How was your day?`,
+        `Hey ${nickname}. Ready to practice? How's your day going?`,
+        `Welcome back ${nickname}. How's everything going today?`
+      ])
+      : getRandom([
+        "Hi! Good to see you. How was your day?",
+        "Hey. Ready to practice? How's your day going?",
+        "Welcome back. How's everything going today?"
+      ]);
   }
 
   if (hoursGap > 3) { // 3-12 hrs (Later Today)
     return nickname
-      ? `Hey again ${nickname}! How's the rest of your day turning out?`
-      : "Hey again! How's the rest of your day turning out?";
+      ? getRandom([
+        `Hey again ${nickname}. How's the rest of your day going?`,
+        `Back for more ${nickname}? How's your day treating you?`,
+        `Hi ${nickname}. Taking a quick break to chat?`
+      ])
+      : getRandom([
+        "Hey again. How's the rest of your day going?",
+        "Back for more? How's your day treating you?",
+        "Hi there. Taking a quick break to chat?"
+      ]);
   }
 
   if (hoursGap > 0) { // < 3 hrs (Just Now)
     return nickname
-      ? `Welcome back ${nickname}! Did you want to carry on with what we were saying?`
-      : "Welcome back! Did you want to carry on with what we were saying?";
+      ? getRandom([
+        `Welcome back ${nickname}. Picking up where we left off?`,
+        `Hey ${nickname}. Ready to keep going?`,
+        `Hi again ${nickname}. What's on your mind now?`,
+        `Back so soon ${nickname}? I'm ready if you are!`
+      ])
+      : getRandom([
+        "Welcome back. Picking up where we left off?",
+        "Hey. Ready to keep going?",
+        "Hi again. What's on your mind now?",
+        "Back so soon? I'm ready if you are!"
+      ]);
   }
 
   // First time or no previous data - use simple greeting
   return nickname
-    ? `Hi ${nickname}! How are you doing today?`
-    : "Hi! How are you doing today?";
+    ? `Hi ${nickname}. I'm SpeakMate. Nice to meet you.`
+    : "Hi! I'm SpeakMate. Nice to meet you.";
 }
 
 /**

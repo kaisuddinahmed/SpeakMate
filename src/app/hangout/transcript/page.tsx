@@ -83,29 +83,33 @@ function TranscriptContent() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            {/* Mobile Container */}
-            <div className="w-full max-w-md mx-auto min-h-screen flex flex-col bg-white">
-                {/* Header */}
-                <header className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 z-10">
-                    <div className="flex items-center justify-center relative">
-                        <button
-                            onClick={handleBack}
-                            className="absolute left-0 text-gray-600 hover:text-gray-800"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <h1 className="text-lg font-semibold text-gray-800">Full Transcript</h1>
-                    </div>
-                </header>
+        <div className="min-h-screen bg-white flex justify-center font-sans overflow-x-hidden">
+            <div className="w-full max-w-[430px] h-[100dvh] relative overflow-hidden shadow-2xl bg-white flex flex-col">
+                {/* Background Image */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/assets/Home%20Background.svg"
+                        alt="Home Background"
+                        className="w-full h-full object-cover"
+                    />
+                </div>
 
-                {/* Separator */}
-                <div className="h-px bg-gray-200"></div>
+                {/* Header - Transparent Glass */}
+                <div className="relative z-20 flex items-center justify-between px-6 py-6 pt-12">
+                    <button
+                        onClick={handleBack}
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-white/40 backdrop-blur-md border border-white/50 text-gray-700 shadow-sm hover:scale-105 transition-transform"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h1 className="text-xl font-bold text-gray-800 drop-shadow-sm">Full Transcript</h1>
+                    <div className="w-10"></div>
+                </div>
 
                 {/* Chat Messages */}
-                <main className="flex-1 px-4 py-4 space-y-4 overflow-auto pb-24 bg-gray-50">
+                <main className="relative z-10 flex-1 px-5 py-4 space-y-4 overflow-y-auto scrollbar-hide pb-32">
                     {messages.length === 0 ? (
                         <div className="text-center text-gray-500 py-12">
                             No conversation found.
@@ -123,14 +127,14 @@ function TranscriptContent() {
                                     <div className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
                                         {/* Message Bubble */}
                                         <div
-                                            className={`rounded-2xl px-4 py-3 ${isUser
-                                                ? 'bg-blue-500 text-white rounded-br-md'
-                                                : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md'
+                                            className={`rounded-2xl px-5 py-3 shadow-sm backdrop-blur-md ${isUser
+                                                ? 'bg-blue-600 text-white rounded-br-md'
+                                                : 'bg-white/60 text-gray-800 border border-white/50 rounded-bl-md'
                                                 }`}
                                         >
-                                            <p className="text-sm leading-relaxed">{msg.text}</p>
+                                            <p className="text-sm leading-relaxed font-medium">{msg.text}</p>
                                             {msg.timestamp && (
-                                                <p className={`text-xs mt-1 ${isUser ? 'text-blue-100' : 'text-gray-400'}`}>
+                                                <p className={`text-xs mt-1 ${isUser ? 'text-blue-100' : 'text-gray-500'}`}>
                                                     {msg.timestamp}
                                                 </p>
                                             )}
@@ -142,9 +146,9 @@ function TranscriptContent() {
                                                 {messageCorrections.map((corr, corrIdx) => (
                                                     <div
                                                         key={corrIdx}
-                                                        className={`rounded-xl p-3 text-sm ${corr.severity === 'MAJOR' || corr.severity === 'CRITICAL'
-                                                            ? 'bg-red-50 border border-red-200'
-                                                            : 'bg-yellow-50 border border-yellow-200'
+                                                        className={`rounded-xl p-3 text-sm backdrop-blur-md border ${corr.severity === 'MAJOR' || corr.severity === 'CRITICAL'
+                                                            ? 'bg-red-500/10 border-red-200/50'
+                                                            : 'bg-yellow-500/10 border-yellow-200/50'
                                                             }`}
                                                     >
                                                         {/* Severity Badge */}
@@ -188,14 +192,16 @@ function TranscriptContent() {
                     )}
                 </main>
 
-                {/* Bottom Button (Static) */}
-                <div className="bg-white p-4 border-t border-gray-100">
-                    <button
-                        onClick={handleBack}
-                        className="w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-shadow"
-                    >
-                        Back to Feedback
-                    </button>
+                {/* Fixed Bottom Button with Transparent Glass */}
+                <div className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-t border-white/30 z-50">
+                    <div className="w-full max-w-[430px] mx-auto p-4">
+                        <button
+                            onClick={handleBack}
+                            className="w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white py-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]"
+                        >
+                            Back to Feedback
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
