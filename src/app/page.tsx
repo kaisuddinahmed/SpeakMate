@@ -121,7 +121,15 @@ function HomeContent() {
       const storedGoal = window.localStorage.getItem("speakmate_goal");
 
       if (storedName) setUserName(storedName);
-      if (storedGoal) setSelectedGoal(storedGoal);
+      if (storedGoal) {
+        // Legacy Fix: Migrate 'ielts' to 'ieltsprep'
+        if (storedGoal === 'ielts') {
+          setSelectedGoal('ieltsprep');
+          window.localStorage.setItem("speakmate_goal", "ieltsprep");
+        } else {
+          setSelectedGoal(storedGoal);
+        }
+      }
     }
   }, []);
 
@@ -129,8 +137,10 @@ function HomeContent() {
     const goalParam = searchParams.get('goal');
     const viewParam = searchParams.get('view');
 
-    if (goalParam && ['ielts', 'professional', 'general'].includes(goalParam)) {
+    if (goalParam && ['ieltsprep', 'professional', 'general'].includes(goalParam)) {
       router.push(`/${goalParam}`);
+    } else if (goalParam === 'ielts') {
+      router.push('/ieltsprep');
     } else if (viewParam === 'goals') {
       setScreen('goals');
     }
@@ -211,7 +221,9 @@ function HomeContent() {
             onClick={() => {
               if (password === "1234") {
                 if (selectedGoal) {
-                  router.push(`/${selectedGoal}`);
+                  // Final safety check for legacy value
+                  const targetGoal = selectedGoal === 'ielts' ? 'ieltsprep' : selectedGoal;
+                  router.push(`/${targetGoal}`);
                 } else {
                   setScreen("goals");
                 }
@@ -356,7 +368,7 @@ function HomeContent() {
 
   if (screen === "goals") {
     const goals = [
-      { id: "ielts", icon: "📝", title: "IELTS Prep", desc: "Ace your exam" },
+      { id: "ieltsprep", icon: "📝", title: "IELTS Prep", desc: "Ace your exam" },
       { id: "professional", icon: "💼", title: "Professional", desc: "Business English" },
       { id: "general", icon: "🗣️", title: "General", desc: "Daily conversation" },
     ];
@@ -405,7 +417,7 @@ function HomeContent() {
             className="w-full mt-8 py-4 px-6 text-white text-lg font-bold rounded-2xl transition-all transform active:scale-[0.98] shadow-lg shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed tracking-wide ring-1 ring-white/20"
             style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%, #EC4899 100%)' }}
           >
-            Start Learning
+            Confirm
           </button>
         </div>
       </OnboardingLayout>

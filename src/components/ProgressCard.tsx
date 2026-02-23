@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 
 export function ProgressCard({
     score = 7.5,
@@ -67,9 +68,9 @@ export function ProgressCard({
                     </div>
 
                     {/* Score Text */}
-                    <div className="absolute inset-0 flex items-center justify-center pt-1 z-10">
+                    <Link href="/ieltsprep/dashboard" className="absolute inset-0 flex items-center justify-center pt-1 z-10 w-full mt-4 py-3 bg-white/20 hover:bg-white/30 rounded-xl text-white font-semibold flex items-center justify-center gap-2 transition-all group">
                         <span className="text-2xl font-black text-slate-800 tracking-tighter">{score}</span>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Text Info */}

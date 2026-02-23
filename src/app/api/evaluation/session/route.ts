@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { evaluateConversation } from '@/lib/services/evaluation';
+import { evaluateConversation } from '@/features/hangout/services/evaluation';
 
 export async function POST(request: NextRequest) {
   try {

@@ -66,7 +66,12 @@ function SummaryContent() {
           return;
         }
 
-        const transcript = JSON.parse(transcriptStr);
+        const transcript = JSON.parse(transcriptStr).map((msg: any) => ({
+          speaker: msg.role === 'assistant' ? 'ai' : 'user',
+          text: msg.content,
+          timestamp: msg.timestamp,
+          confidence: msg.confidence // Pass confidence to evaluation
+        }));
         const conversationHistory = JSON.parse(conversationHistoryStr || '[]');
 
         // Call OpenAI evaluation API
@@ -132,11 +137,11 @@ function SummaryContent() {
         setSummary({
           duration,
           messageCount,
-          overallProficiency: 5.0,
-          fluency: 5.0,
-          vocabulary: 5.0,
-          grammar: 5.0,
-          pronunciation: 5.0
+          overallProficiency: 1.0, // Default to 1.0 if failed
+          fluency: 1.0,
+          vocabulary: 1.0,
+          grammar: 1.0,
+          pronunciation: 1.0
         });
       } finally {
         setIsEvaluating(false);
@@ -166,6 +171,13 @@ function SummaryContent() {
     if (currentGoal) params.append("goal", currentGoal);
 
     router.push(`/hangout/detailed-feedback?${params.toString()}`);
+  };
+
+  const getSessionTitle = () => {
+    if (summary.overallProficiency >= 7.0) return "Excellent!";
+    if (summary.overallProficiency >= 5.0) return "Great Job!";
+    if (summary.overallProficiency >= 3.0) return "Good Effort!";
+    return "Keep Practicing";
   };
 
   return (
@@ -208,12 +220,12 @@ function SummaryContent() {
               {/* Celebration or Empty State */}
               {summary.messageCount > 0 ? (
                 <div className="text-center py-6">
-                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                  <div className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center ${summary.overallProficiency >= 3.0 ? 'bg-gradient-to-br from-green-400 to-blue-500' : 'bg-gradient-to-br from-yellow-400 to-orange-500'}`}>
                     <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Great Job!</h2>
+                  <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">{getSessionTitle()}</h2>
                   <p className="text-gray-600 dark:text-gray-300">You&apos;ve completed another conversation session</p>
                 </div>
               ) : (

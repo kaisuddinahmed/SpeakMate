@@ -5,9 +5,9 @@ export function BottomNav() {
     const router = useRouter();
     const pathname = usePathname();
 
-    // Determine context (ielts, professional, or general)
+    // Determine context (ieltsprep, professional, or general)
     let currentGoal = "general";
-    if (pathname?.includes("/ielts")) currentGoal = "ielts";
+    if (pathname?.includes("/ieltsprep")) currentGoal = "ieltsprep";
     if (pathname?.includes("/professional")) currentGoal = "professional";
 
     // Active State Logic

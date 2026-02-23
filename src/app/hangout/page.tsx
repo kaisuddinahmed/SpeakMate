@@ -2,16 +2,25 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useConversationController } from "@/features/hangout/controller/useConversationController";
-import { HangoutUI } from "./HangoutUI";
+import Head from "next/head";
+import { useConversation } from "@/features/hangout/hooks/useConversation";
+import { HangoutUI } from "@/features/hangout/components/HangoutUI";
 
 function HangoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const goal = searchParams.get("goal") || "ielts";
+  const goal = searchParams.get("goal") || "general";
 
-  const controller = useConversationController();
-  const { messages, stopListening } = controller;
+  // New Unified Hook
+  const {
+    state: conversationState,
+    messages,
+    interimTranscript,
+    isListening,
+    startSession,
+    stopSession,
+    error
+  } = useConversation();
 
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
 
@@ -20,12 +29,13 @@ function HangoutContent() {
   }, []);
 
   const handleBack = () => {
-    stopListening();
-    router.push(goal ? `/?goal=${goal}` : '/');
+    stopSession();
+    // Force specific redirect to clear any potential shallow routing issues
+    window.location.href = goal ? `/?goal=${goal}` : '/';
   };
 
   const handleFinish = () => {
-    stopListening();
+    stopSession();
 
     const durationMs = sessionStartTime ? Date.now() - sessionStartTime : 0;
     const minutes = Math.floor(durationMs / 60000);
@@ -37,23 +47,34 @@ function HangoutContent() {
     params.append("messages", messages.length.toString());
     if (goal) params.append("goal", goal);
 
+    // Save Transcript for the Summary Page to Evaluate
+    sessionStorage.setItem('hangoutTranscript', JSON.stringify(messages));
+    sessionStorage.setItem('conversationHistory', JSON.stringify(messages)); // Logic in summary page checks both
+
+    // Clear previous evaluation cache to force new evaluation
+    sessionStorage.removeItem('cachedEvaluation');
+    sessionStorage.removeItem('detailedFeedback');
+
     router.push(`/hangout/summary?${params.toString()}`);
   };
 
   const handleEndCall = () => {
-    stopListening();
+    stopSession();
     if (messages.length > 0) {
       handleFinish();
     }
   };
 
+  const isAISpeaking = conversationState === 'speaking' || conversationState === 'thinking';
+
   return (
     <HangoutUI
-      messages={controller.messages}
-      interimTranscript={controller.interimTranscript}
-      isListening={controller.isListening}
-      isAISpeaking={controller.isAISpeaking}
-      onStartSession={controller.startSession}
+      messages={messages}
+      interimTranscript={interimTranscript}
+      isListening={isListening}
+      isAISpeaking={isAISpeaking}
+      conversationState={conversationState.toUpperCase() as any}
+      onStartSession={startSession}
       onBack={handleBack}
       onEndCall={handleEndCall}
     />

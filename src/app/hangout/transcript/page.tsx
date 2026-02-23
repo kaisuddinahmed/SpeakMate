@@ -2,11 +2,12 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
-    speaker: 'user' | 'ai';
-    text: string;
-    timestamp?: string;
+    role: 'user' | 'assistant'; // Normalized to 'role' to match controller
+    content: string;          // Normalized to 'content'
+    timestamp: number;
 }
 
 interface Correction {
@@ -34,7 +35,13 @@ function TranscriptContent() {
         if (transcriptStr) {
             try {
                 const parsed = JSON.parse(transcriptStr);
-                setMessages(parsed);
+                // Normalize data structure if needed (handle both 'speaker' and 'role')
+                const normalized = parsed.map((m: any) => ({
+                    role: m.role || (m.speaker === 'user' ? 'user' : 'assistant'),
+                    content: m.content || m.text,
+                    timestamp: m.timestamp
+                }));
+                setMessages(normalized);
             } catch (e) {
                 console.error("Failed to parse transcript:", e);
             }
@@ -56,21 +63,16 @@ function TranscriptContent() {
         router.back();
     };
 
-    // Validate corrections data
-    useEffect(() => {
-        if (corrections.length > 0) {
-            console.log("Loaded corrections:", corrections.length);
-        }
-    }, [corrections]);
-
-    // Find corrections for a specific message with fuzzy matching
+    // Find corrections for a specific message with improved matching
     const getCorrectionsForMessage = (messageContent: string): Correction[] => {
+        if (!messageContent) return [];
         const normalize = (text: string) => text.toLowerCase().replace(/[.,!?;:'"()-]/g, '').trim();
         const normMsg = normalize(messageContent);
 
         return corrections.filter(c => {
             const normQuote = normalize(c.quote);
-            return normMsg.includes(normQuote) || normQuote.includes(normMsg);
+            // Check if the quote describes a substantial part of this message
+            return normMsg.includes(normQuote) || (normQuote.length > 5 && normQuote.includes(normMsg));
         });
     };
 
@@ -109,84 +111,104 @@ function TranscriptContent() {
                 </div>
 
                 {/* Chat Messages */}
-                <main className="relative z-10 flex-1 px-5 py-4 space-y-4 overflow-y-auto scrollbar-hide pb-32">
+                <main className="relative z-10 flex-1 px-5 py-4 space-y-6 overflow-y-auto scrollbar-hide pb-32">
                     {messages.length === 0 ? (
-                        <div className="text-center text-gray-500 py-12">
-                            No conversation found.
+                        <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                            <p>No conversation found.</p>
                         </div>
                     ) : (
                         messages.map((msg, idx) => {
-                            const isUser = msg.speaker === 'user';
-                            const messageCorrections = isUser ? getCorrectionsForMessage(msg.text) : [];
+                            const isUser = msg.role === 'user';
+                            const messageCorrections = isUser ? getCorrectionsForMessage(msg.content) : [];
 
                             return (
-                                <div
+                                <motion.div
                                     key={idx}
-                                    className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                                 >
-                                    <div className={`max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
+                                    {/* Sender Label */}
+                                    <span className={`text-[10px] font-semibold tracking-wider mb-1 px-1 ${isUser ? 'text-blue-600' : 'text-purple-600'}`}>
+                                        {isUser ? 'YOU' : 'SPEAKMATE'}
+                                    </span>
+
+                                    <div className={`max-w-[85%] ${isUser ? 'items-end' : 'items-start'}`}>
                                         {/* Message Bubble */}
                                         <div
-                                            className={`rounded-2xl px-5 py-3 shadow-sm backdrop-blur-md ${isUser
-                                                ? 'bg-blue-600 text-white rounded-br-md'
-                                                : 'bg-white/60 text-gray-800 border border-white/50 rounded-bl-md'
+                                            className={`rounded-2xl px-5 py-3 shadow-md backdrop-blur-md border ${isUser
+                                                ? 'bg-blue-600/90 text-white border-blue-500/50 rounded-tr-sm'
+                                                : 'bg-white/70 text-gray-800 border-white/60 rounded-tl-sm'
                                                 }`}
                                         >
-                                            <p className="text-sm leading-relaxed font-medium">{msg.text}</p>
-                                            {msg.timestamp && (
-                                                <p className={`text-xs mt-1 ${isUser ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                    {msg.timestamp}
-                                                </p>
-                                            )}
+                                            <p className="text-sm leading-relaxed font-medium">{msg.content}</p>
                                         </div>
 
-                                        {/* Corrections (only for user messages) */}
-                                        {messageCorrections.length > 0 && (
-                                            <div className="mt-2 space-y-2">
+                                        {/* Corrections OR Perfect Badge */}
+                                        {messageCorrections.length > 0 ? (
+                                            <div className="mt-3 space-y-3 pl-2">
                                                 {messageCorrections.map((corr, corrIdx) => (
                                                     <div
                                                         key={corrIdx}
-                                                        className={`rounded-xl p-3 text-sm backdrop-blur-md border ${corr.severity === 'MAJOR' || corr.severity === 'CRITICAL'
-                                                            ? 'bg-red-500/10 border-red-200/50'
-                                                            : 'bg-yellow-500/10 border-yellow-200/50'
+                                                        className={`relative overflow-hidden rounded-xl p-3 text-sm backdrop-blur-md border shadow-sm ${corr.severity === 'MAJOR' || corr.severity === 'CRITICAL'
+                                                            ? 'bg-red-50/90 border-red-200'
+                                                            : 'bg-amber-50/90 border-amber-200'
                                                             }`}
                                                     >
-                                                        {/* Severity Badge */}
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <span
-                                                                className={`px-2 py-0.5 rounded-full text-xs font-semibold ${corr.severity === 'MAJOR' || corr.severity === 'CRITICAL'
-                                                                    ? 'bg-red-100 text-red-700'
-                                                                    : 'bg-yellow-100 text-yellow-700'
-                                                                    }`}
-                                                            >
-                                                                {corr.severity === 'CRITICAL' ? '🚨 CRITICAL' : corr.severity === 'MAJOR' ? '🔴 MAJOR' : '🟡 MINOR'}
-                                                            </span>
-                                                            <span className={`text-xs font-medium ${corr.severity === 'MAJOR' || corr.severity === 'CRITICAL' ? 'text-red-600' : 'text-yellow-600'
+                                                        {/* Left Accent Bar */}
+                                                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${corr.severity === 'MAJOR' || corr.severity === 'CRITICAL' ? 'bg-red-500' : 'bg-amber-500'
+                                                            }`} />
+
+                                                        {/* Header */}
+                                                        <div className="flex items-center justify-between mb-2 pl-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`text-xs font-bold uppercase tracking-wide ${corr.severity === 'MAJOR' || corr.severity === 'CRITICAL' ? 'text-red-600' : 'text-amber-700'
+                                                                    }`}>
+                                                                    {corr.criterion}
+                                                                </span>
+                                                            </div>
+                                                            {corr.severity === 'CRITICAL' && (
+                                                                <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">
+                                                                    CRITICAL
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="pl-2 space-y-2">
+                                                            <div>
+                                                                <div className="flex items-start gap-2 text-gray-400 text-xs mb-1">
+                                                                    <span className="line-through decoration-red-400 decoration-2 text-gray-500 font-medium">
+                                                                        {corr.quote}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-start gap-2 text-green-700 font-bold text-sm">
+                                                                    <span>{corr.correction}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className={`text-xs leading-relaxed pt-1 border-t ${corr.severity === 'MAJOR' ? 'border-red-100 text-red-800' : 'border-amber-100 text-amber-800'
                                                                 }`}>
-                                                                [{corr.criterion}]
-                                                            </span>
+                                                                {corr.explanation}
+                                                            </div>
                                                         </div>
-
-                                                        {/* Correction */}
-                                                        <div className="flex items-start gap-2 text-gray-700">
-                                                            <span className="text-red-500">❌</span>
-                                                            <span className="line-through text-gray-500">{corr.quote}</span>
-                                                        </div>
-                                                        <div className="flex items-start gap-2 text-gray-700 mt-1">
-                                                            <span className="text-green-500">✓</span>
-                                                            <span className="text-green-700 font-medium">{corr.correction}</span>
-                                                        </div>
-
-                                                        {/* Explanation */}
-                                                        <p className="text-gray-600 text-xs mt-2 italic">
-                                                            {corr.explanation}
-                                                        </p>
                                                     </div>
                                                 ))}
                                             </div>
+                                        ) : (
+                                            /* Perfect Badge for Good Speech (>2 words) */
+                                            isUser && msg.content.split(' ').length > 2 && (
+                                                <div className="mt-2 pl-2">
+                                                    <div className="inline-flex items-center gap-1.5 bg-green-100/80 border border-green-200 text-green-700 px-3 py-1.5 rounded-full backdrop-blur-sm shadow-sm">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        <span className="text-xs font-bold uppercase tracking-wide">Perfect</span>
+                                                    </div>
+                                                </div>
+                                            )
                                         )}
                                     </div>
-                                </div>
+                                </motion.div>
                             );
                         })
                     )}

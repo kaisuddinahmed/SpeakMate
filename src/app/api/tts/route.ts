@@ -1,54 +1,55 @@
-import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { NextRequest, NextResponse } from 'next/server';
 
-export const dynamic = "force-dynamic";
+// Using Deepgram Aura TTS (high quality, low latency, American voice)
+// Voice: aura-2-iris-en (Calm, energetic, friendly)
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export async function GET(req: NextRequest) {
+    try {
+        const text = req.nextUrl.searchParams.get('text');
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json().catch(() => null);
-    const text = body?.text as string | undefined;
+        if (!text) {
+            return NextResponse.json(
+                { error: 'Missing text parameter' },
+                { status: 400 }
+            );
+        }
 
-    if (!text || !text.trim()) {
-      return NextResponse.json(
-        { error: "Missing or empty 'text' field." },
-        { status: 400 }
-      );
+        // Call Deepgram Aura TTS
+        const response = await fetch(
+            'https://api.deepgram.com/v1/speak?model=aura-2-iris-en',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${process.env.DEEPGRAM_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error(`[TTS API] Deepgram Error: ${response.status} - ${errText}`);
+            throw new Error(`Deepgram TTS failed: ${response.status}`);
+        }
+
+        // Stream the audio response
+        const audioBuffer = await response.arrayBuffer();
+
+        return new NextResponse(audioBuffer, {
+            headers: {
+                'Content-Type': 'audio/mpeg',
+                'Cache-Control': 'no-cache, no-store, must-revalidate'
+            }
+        });
+
+    } catch (error: any) {
+        console.error('[TTS API] Error:', error);
+        return NextResponse.json(
+            { error: 'TTS generation failed', details: error.message },
+            { status: 500 }
+        );
     }
-
-    // Call OpenAI TTS API
-    // Model: tts-1 (Standard, cheaper/faster)
-    // Voice: nova
-    // Speed: 0.85 (Slower for natural feel)
-    const mp3 = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: "nova",
-      speed: 0.85,
-      input: text,
-      response_format: "mp3",
-    });
-
-    // Get buffer directly
-    const buffer = Buffer.from(await mp3.arrayBuffer());
-
-    // Return raw audio
-    return new NextResponse(buffer, {
-      status: 200,
-      headers: {
-        "Content-Type": "audio/mpeg",
-        "Content-Length": buffer.length.toString(),
-        "Cache-Control": "no-store",
-      },
-    });
-
-  } catch (err: any) {
-    console.error("[TTS] Route error:", err);
-    return NextResponse.json(
-      { error: "TTS generation failed.", details: err.message },
-      { status: 500 }
-    );
-  }
 }

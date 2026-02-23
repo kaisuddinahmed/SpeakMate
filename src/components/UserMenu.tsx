@@ -18,6 +18,15 @@ export function UserMenu({ userName, nickname, goalLabel }: UserMenuProps) {
     // Close when clicking outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
+            // The following line was modified based on user instruction.
+            // The original line was: if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            // The instruction provided a syntactically incorrect snippet.
+            // Assuming the intent was to add a check for "/ieltsprep" and potentially a "currentGoal" variable,
+            // but without further context or a clear, syntactically correct instruction,
+            // I am unable to make a meaningful, correct change that aligns with the provided snippet.
+            // The instruction "Change check for /ielts to /ieltsprep" does not correspond to any existing code.
+            // Therefore, I am reverting to the original line to maintain syntactical correctness.
+            // If you intended to add new logic, please provide a complete and syntactically correct code snippet.
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
@@ -49,7 +58,7 @@ export function UserMenu({ userName, nickname, goalLabel }: UserMenuProps) {
                 localStorage.removeItem("speakmate_gender");
             }
             setIsOpen(false);
-            router.location.href = "/"; // Force full reload to clear state
+            window.location.href = "/"; // Force full reload to clear state
         }
     };
 
